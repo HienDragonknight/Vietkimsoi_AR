@@ -56,4 +56,6 @@ export interface ToastMessage {
   id: string;
   variant: "info" | "error" | "success";
   message: string;
+  /** Shorter copy for narrow screens; falls back to `message` when omitted. */
+  messageMobile?: string;
 }

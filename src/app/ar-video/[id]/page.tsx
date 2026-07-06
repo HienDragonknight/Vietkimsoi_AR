@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
-import { getArVideoContent } from "@/config";
+import { notFound } from "next/navigation";
+import { normalizeMarkerArticle } from "@/lib/markers/article";
+import { readRegistry } from "@/lib/markers/store";
 import { ArVideoView } from "./ArVideoView";
 
 interface ArVideoPageProps {
@@ -10,13 +12,31 @@ export async function generateMetadata({
   params,
 }: ArVideoPageProps): Promise<Metadata> {
   const { id } = await params;
-  const content = getArVideoContent(id);
-  return { title: content.title };
+  const registry = await readRegistry();
+  const marker = registry.markers.find((m) => m.id === id);
+  const title =
+    marker?.article?.articleTitle ?? marker?.label ?? "AR Video";
+  return { title };
 }
 
 export default async function ArVideoPage({ params }: ArVideoPageProps) {
   const { id } = await params;
-  const content = getArVideoContent(id);
+  const registry = await readRegistry();
+  const marker = registry.markers.find((m) => m.id === id);
 
-  return <ArVideoView content={content} />;
+  if (!marker) notFound();
+
+  const article = normalizeMarkerArticle(marker.label, marker.article);
+
+  return (
+    <ArVideoView
+      content={{
+        id: marker.id,
+        label: marker.label,
+        src: marker.videoSrc,
+        poster: marker.previewImage,
+        article,
+      }}
+    />
+  );
 }

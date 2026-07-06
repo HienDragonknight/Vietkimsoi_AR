@@ -2,9 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  allowedDevOrigins: ["10.133.95.155", "192.168.1.162", "*.local"],
   webpack: (config) => {
-    // mind-ar ships a couple of large pre-bundled workers/wasm-ish chunks that
-    // rely on being loaded as plain scripts in the browser only.
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,

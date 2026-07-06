@@ -1,59 +1,101 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo } from "react";
-import { CameraView } from "@/components/CameraView";
+import { AnimatePresence } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { CloseButton } from "@/components/CloseButton";
+import { LoadingScreen } from "@/components/LoadingScreen";
 import { ScanButton } from "@/components/ScanButton";
 import { ScanOverlay } from "@/components/ScanOverlay";
 import { StatusToast } from "@/components/StatusToast";
-import { getMarkerRouteId } from "@/config";
-import { useCamera } from "@/hooks/useCamera";
-import { useMindAR } from "@/hooks/useMindAR";
+import { useMindARScene } from "@/hooks/useMindARScene";
+import { getMarkerIdByTargetIndex } from "@/lib/markers/utils";
+import type { PublicMarkerConfig } from "@/lib/markers/types";
 import type { ToastMessage } from "@/types";
 
 export default function ScanPage() {
   const router = useRouter();
-  const {
-    videoRef,
-    status: cameraStatus,
-    errorMessage: cameraError,
-    retry,
-    facingMode,
-  } = useCamera();
-  const {
-    status: mindARStatus,
-    errorMessage: mindARError,
-    detectedTargetIndex,
-    startScanning,
-  } = useMindAR(videoRef);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [markerConfig, setMarkerConfig] = useState<PublicMarkerConfig | null>(
+    null
+  );
+  const [configError, setConfigError] = useState<string | null>(null);
+
+  const { status: mindARStatus, errorMessage: mindARError, detectedTargetIndex, detectedLabel } =
+    useMindARScene(containerRef, markerConfig);
+
+  const [isMismatched, setIsMismatched] = useState(false);
 
   useEffect(() => {
-    if (mindARStatus !== "found" || detectedTargetIndex === null) return;
+    fetch("/api/markers/config")
+      .then((res) => {
+        if (!res.ok) throw new Error("Không tải được cấu hình marker.");
+        return res.json();
+      })
+      .then((data: PublicMarkerConfig) => setMarkerConfig(data))
+      .catch((e) =>
+        setConfigError(e instanceof Error ? e.message : "Lỗi cấu hình.")
+      );
+  }, []);
 
-    const id = getMarkerRouteId(detectedTargetIndex);
-    const timer = setTimeout(() => {
-      router.push(`/ar-video/${id}`);
-    }, 900);
-
+  useEffect(() => {
+    if (mindARStatus !== "scanning") {
+      setIsMismatched(false);
+      return;
+    }
+    const timer = setTimeout(() => setIsMismatched(true), 6000);
     return () => clearTimeout(timer);
-  }, [mindARStatus, detectedTargetIndex, router]);
+  }, [mindARStatus]);
+
+  useEffect(() => {
+    if (mindARStatus !== "found" || detectedTargetIndex === null || !markerConfig) {
+      return;
+    }
+    const id = getMarkerIdByTargetIndex(markerConfig, detectedTargetIndex);
+    if (id) router.push(`/ar-video/${id}`);
+  }, [mindARStatus, detectedTargetIndex, markerConfig, router]);
 
   const toast = useMemo<ToastMessage | null>(() => {
+    if (configError) {
+      return { id: "cfg-error", variant: "error", message: configError };
+    }
+    if (isMismatched) {
+      return {
+        id: "mismatch",
+        variant: "error",
+        message:
+          "Ảnh đang quét không khớp marker nào. Hãy căn chỉnh đúng ảnh in và thử lại.",
+        messageMobile: "Ảnh không khớp. Căn chỉnh lại ảnh in.",
+      };
+    }
+
     switch (mindARStatus) {
+      case "idle":
       case "loading":
-        return { id: "loading", variant: "info", message: "Đang khởi động nhận diện..." };
+        return {
+          id: "loading",
+          variant: "info",
+          message: "Đang khởi động nhận diện...",
+          messageMobile: "Đang khởi động...",
+        };
       case "scanning":
         return {
           id: "scanning",
           variant: "info",
           message: "Di chuyển camera đến gần hình ảnh cần quét",
+          messageMobile: "Đưa camera gần ảnh cần quét",
         };
       case "found":
         return {
           id: "found",
           variant: "success",
-          message: "Đã tìm thấy hình ảnh! Đang mở video...",
+          message: detectedLabel
+            ? `Đã nhận: ${detectedLabel}. Đang mở video...`
+            : "Đã tìm thấy hình ảnh! Đang mở video...",
+          messageMobile: detectedLabel
+            ? `Đã nhận: ${detectedLabel}`
+            : "Đã tìm thấy ảnh!",
         };
       case "error":
         return {
@@ -64,7 +106,7 @@ export default function ScanPage() {
       default:
         return null;
     }
-  }, [mindARStatus, mindARError]);
+  }, [mindARStatus, mindARError, isMismatched, configError, detectedLabel]);
 
   const handleClose = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -74,29 +116,61 @@ export default function ScanPage() {
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black">
-      <CameraView
-        videoRef={videoRef}
-        status={cameraStatus}
-        errorMessage={cameraError}
-        facingMode={facingMode}
-        onRetry={retry}
-      >
-        <StatusToast toast={toast} />
+      <div ref={containerRef} className="ar-camera-root absolute inset-0 z-0" />
 
-        <div className="absolute inset-0 flex items-center justify-center">
-          <ScanOverlay size={280} animated={mindARStatus !== "found"} />
-        </div>
+      <AnimatePresence>
+        {(!markerConfig || mindARStatus === "idle" || mindARStatus === "loading") && (
+          <LoadingScreen key="ar-loading" subtitle="Đang khởi động nhận diện..." />
+        )}
+      </AnimatePresence>
 
-        <div className="safe-bottom absolute inset-x-0 bottom-0 flex justify-center pb-8">
-          <ScanButton
-            onClick={startScanning}
-            loading={mindARStatus === "loading" || mindARStatus === "scanning"}
-            disabled={mindARStatus === "loading" || mindARStatus === "scanning" || mindARStatus === "found"}
-          />
-        </div>
-      </CameraView>
+      <StatusToast toast={toast} />
 
-      <div className="safe-top safe-right absolute right-0 top-0 z-50">
+      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4">
+        <ScanOverlay
+          responsive
+          animated={mindARStatus !== "found"}
+          variant={
+            mindARStatus === "found"
+              ? "success"
+              : isMismatched
+              ? "warning"
+              : "normal"
+          }
+        />
+      </div>
+
+      <div className="safe-bottom absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-8">
+        <ScanButton
+          className="w-full max-w-md text-[13px] sm:text-[15px]"
+          loading={mindARStatus === "loading" || mindARStatus === "scanning"}
+          disabled={true}
+          variant={
+            mindARStatus === "found"
+              ? "success"
+              : isMismatched
+              ? "warning"
+              : "normal"
+          }
+          label={
+            mindARStatus === "loading" || mindARStatus === "idle"
+              ? "Đang khởi chạy nhận diện..."
+              : mindARStatus === "found"
+              ? "Đã khớp ảnh thành công!"
+              : isMismatched
+              ? "Không phải ảnh đúng. Căn chỉnh lại!"
+              : "Đang tự động quét ảnh..."
+          }
+        />
+      </div>
+
+      <div className="safe-top safe-right absolute right-0 top-0 z-50 flex items-center gap-1.5 px-2 sm:gap-2 sm:px-0">
+        <Link
+          href="/admin"
+          className="rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-medium text-white/80 backdrop-blur-md transition hover:bg-black/70 sm:px-3 sm:py-1.5 sm:text-[11px]"
+        >
+          Admin
+        </Link>
         <CloseButton onClick={handleClose} />
       </div>
     </main>

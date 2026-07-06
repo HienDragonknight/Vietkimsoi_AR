@@ -2,15 +2,24 @@
 
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import { ArticleContent } from "@/components/ArticleContent";
 import { BackButton } from "@/components/BackButton";
-import { VideoPlayer } from "@/components/VideoPlayer";
-import type { ArVideoContent } from "@/types";
+import { VideoHero } from "@/components/VideoHero";
+import type { MarkerArticle } from "@/lib/markers/types";
 
-interface ArVideoViewProps {
-  content: ArVideoContent;
+export interface ArPageContent {
+  id: string;
+  label: string;
+  src: string;
+  poster?: string;
+  article: MarkerArticle;
 }
 
-/** Full-screen AR result page: black backdrop, centered video, floating back button. */
+interface ArVideoViewProps {
+  content: ArPageContent;
+}
+
+/** AR result page: video hero on top, scrollable article below. */
 export function ArVideoView({ content }: ArVideoViewProps) {
   const router = useRouter();
 
@@ -23,17 +32,24 @@ export function ArVideoView({ content }: ArVideoViewProps) {
   };
 
   return (
-    <motion.main
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="relative flex h-[100dvh] w-screen items-center justify-center overflow-hidden bg-black"
+      transition={{ duration: 0.45, ease: "easeOut" }}
+      className="min-h-[100dvh] w-full overflow-x-hidden overflow-y-auto bg-[#FFF9F1]"
     >
-      <VideoPlayer src={content.src} poster={content.poster} title={content.title} />
-
-      <div className="safe-top safe-left absolute left-0 top-0 z-50">
-        <BackButton onClick={handleBack} />
+      <div className="relative">
+        <VideoHero
+          src={content.src}
+          poster={content.poster}
+          title={content.label}
+        />
+        <div className="safe-top safe-left absolute left-0 top-0 z-20 p-3 sm:p-4">
+          <BackButton onClick={handleBack} />
+        </div>
       </div>
-    </motion.main>
+
+      <ArticleContent article={content.article} />
+    </motion.div>
   );
 }

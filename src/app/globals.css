@@ -39,3 +39,41 @@ body {
 .safe-right {
   padding-right: max(1rem, env(safe-area-inset-right));
 }
+
+/* MindAR / AFRAME: camera feed as full-screen background, transparent WebGL layer */
+.ar-camera-root,
+.ar-camera-root a-scene {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  overflow: hidden !important;
+  background: transparent !important;
+}
+
+.ar-camera-root video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  z-index: 0 !important;
+}
+
+.ar-camera-root canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  z-index: 1 !important;
+  pointer-events: none;
+}
+
+/* Admin form field utility */
+.field-input {
+  @apply h-12 w-full rounded-xl border border-white/15 bg-black/40 px-4 text-base outline-none focus:border-white/30;
+}
+
+textarea.field-input {
+  @apply h-auto min-h-[88px] py-3;
+}

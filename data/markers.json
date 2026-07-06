@@ -1,0 +1,70 @@
+{
+  "version": 1,
+  "targetsMind": "/uploads/targets.mind",
+  "markers": [
+    {
+      "id": "1",
+      "label": "Marker 1 - Card MIND",
+      "targetIndex": 0,
+      "previewImage": "/assets/card-test.png",
+      "sourceImage": "/assets/card-test.png",
+      "videoSrc": "/assets/videos/1.mp4",
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "🌾 LÚA – HẠT VÀNG CỦA NỀN VĂN MINH LÚA NƯỚC 🌾",
+        "sections": [
+          {
+            "heading": "NGUỒN GỐC",
+            "body": "Lúa nước gắn liền với đời sống người Việt từ hàng nghìn năm. Những cánh đồng bạt ngàn không chỉ nuôi sống cộng đồng mà còn định hình văn hóa, phong tục và nhịp sống của cả một nền văn minh lúa nước.\n\nTừ Bắc Bộ đến Đồng bằng sông Cửu Long, mỗi vùng miền mang một sắc thái riêng trong cách trồng, gặt và thưởng thức hạt lúa."
+          },
+          {
+            "heading": "Ý NGHĨA BIỂU TƯỢNG",
+            "body": "Hạt lúa là biểu tượng của sự sung túc, của công sức lao động và của sự gắn kết cộng đồng. Mỗi mùa lúa chín là một chu kỳ khẳng định mối quan hệ thiêng liêng giữa con người và thiên nhiên.\n\nTrong văn hóa Việt, lúa không chỉ là lương thực — mà còn là ký ức quê hương, là hình ảnh quen thuộc trong tết đoàn viên và trong từng bữa cơm gia đình."
+          }
+        ]
+      },
+      "createdAt": "2026-07-06T00:00:00.000Z",
+      "updatedAt": "2026-07-06T10:16:05.262Z"
+    },
+    {
+      "id": "m-mr91zjge",
+      "label": "Dragon",
+      "targetIndex": 1,
+      "previewImage": "/uploads/markers/m-mr91zjge/preview.jpg",
+      "sourceImage": "/uploads/markers/m-mr91zjge/source.jpg",
+      "videoSrc": "/uploads/markers/m-mr91zjge/video.mp4",
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "Dragon",
+        "sections": [
+          {
+            "heading": "GIỚI THIỆU",
+            "body": "Thêm nội dung bài viết tại trang Admin."
+          }
+        ]
+      },
+      "createdAt": "2026-07-06T10:04:26.558Z",
+      "updatedAt": "2026-07-06T10:16:05.262Z"
+    },
+    {
+      "id": "m-mr92eiki",
+      "label": "Dragon2",
+      "targetIndex": 2,
+      "previewImage": "/uploads/markers/m-mr92eiki/preview.jpg",
+      "sourceImage": "/uploads/markers/m-mr92eiki/source.jpg",
+      "videoSrc": "/uploads/markers/m-mr92eiki/video.mp4",
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "Dragon2",
+        "sections": [
+          {
+            "heading": "GIỚI THIỆU",
+            "body": "Thêm nội dung bài viết tại trang Admin."
+          }
+        ]
+      },
+      "createdAt": "2026-07-06T10:16:05.250Z",
+      "updatedAt": "2026-07-06T10:16:05.262Z"
+    }
+  ]
+}

@@ -23,7 +23,7 @@ export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
       initial={{ opacity: 0, scale: 0.94, y: 12 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.65, ease: "easeOut" }}
-      className="relative aspect-video w-[92vw] max-w-4xl overflow-hidden rounded-3xl bg-neutral-950 shadow-glass-lg ring-1 ring-white/10 md:w-[82vw] lg:w-[70vw]"
+      className="relative aspect-video w-[94vw] max-w-4xl overflow-hidden rounded-2xl bg-neutral-950 shadow-glass-lg ring-1 ring-white/10 sm:rounded-3xl md:w-[82vw] lg:w-[70vw]"
     >
       <video
         src={src}
