@@ -14,13 +14,23 @@ export function ArticleContent({ article }: ArticleContentProps) {
   return (
     <article className="bg-[#FFF9F1] px-4 py-6 text-neutral-900 sm:px-8 sm:py-10">
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-center text-lg font-bold leading-snug sm:text-xl md:text-2xl">
+        <h1 className="text-center text-lg font-bold leading-snug text-[#8B1E1E] sm:text-xl md:text-2xl">
           {article.articleTitle}
         </h1>
 
         <div className="mt-6 space-y-8 sm:mt-8 sm:space-y-10">
           {article.sections.map((section, i) => (
             <section key={`${section.heading}-${i}`}>
+              {section.image && (
+                <div className="mb-4 overflow-hidden rounded-xl">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={section.image}
+                    alt={section.heading || `Section ${i + 1}`}
+                    className="w-full object-cover"
+                  />
+                </div>
+              )}
               {section.heading && (
                 <h2 className="mb-3 text-sm font-bold tracking-wide text-[#8B1E1E] sm:mb-4 sm:text-base">
                   {section.heading}

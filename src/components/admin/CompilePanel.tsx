@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { compileMarkersToMind, normalizeCompilerProgress } from "@/lib/mindar/compiler-client";
 import type { MarkerEntry } from "@/lib/markers/types";
+import { getVariantCompileSources } from "@/lib/markers/variants";
 
 interface CompilePanelProps {
   markers: MarkerEntry[];
@@ -28,7 +29,7 @@ export function CompilePanel({
   const [status, setStatus] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const sorted = [...markers].sort((a, b) => a.targetIndex - b.targetIndex);
+  const compileSources = getVariantCompileSources(markers);
 
   const uploadMindFile = async (file: File) => {
     setUploading(true);
@@ -51,8 +52,8 @@ export function CompilePanel({
   };
 
   const handleAutoCompile = async () => {
-    if (sorted.length === 0) {
-      setError("Thêm ít nhất 1 marker trước khi compile.");
+    if (compileSources.length === 0) {
+      setError("Thêm ít nhất 1 chủ đề (3 ảnh marker) trước khi compile.");
       return;
     }
 
@@ -62,8 +63,10 @@ export function CompilePanel({
     setStatus("Đang tải MindAR Compiler...");
 
     try {
-      const imageUrls = sorted.map((m) => m.sourceImage);
-      setStatus(`Đang compile ${imageUrls.length} ảnh (thứ tự index 0→${imageUrls.length - 1})...`);
+      const imageUrls = compileSources.map((s) => s.sourceImage);
+      setStatus(
+        `Đang compile ${imageUrls.length} ảnh marker (3 biến thể × ${markers.length} chủ đề)...`
+      );
 
       const buffer = await compileMarkersToMind(imageUrls, (p) => {
         setProgress(normalizeCompilerProgress(p));
@@ -98,9 +101,9 @@ export function CompilePanel({
             MindAR Compiler
           </h2>
           <p className="mt-2 text-xs leading-relaxed text-white/55 sm:text-sm">
-            Tự động compile <strong>targets.mind</strong> từ ảnh nguồn theo đúng thứ
-            tự <code className="text-emerald-300">targetIndex</code> trong danh sách
-            bên dưới. Dùng API chính chủ MindAR (WebGL trên trình duyệt).
+            Compile <strong>targets.mind</strong> từ{" "}
+            <strong>3 ảnh marker / chủ đề</strong> (áo → không nền → có nền).
+            Cùng chủ đề quét ảnh nào cũng mở cùng video.
           </p>
         </div>
 
@@ -108,7 +111,7 @@ export function CompilePanel({
           <button
             type="button"
             onClick={handleAutoCompile}
-            disabled={busy || sorted.length === 0}
+            disabled={busy || compileSources.length === 0}
             className="flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 px-5 text-sm font-semibold text-black transition active:scale-[0.98] disabled:opacity-50"
           >
             {compiling ? (
@@ -152,15 +155,17 @@ export function CompilePanel({
         </div>
       )}
 
-      {sorted.length > 0 && (
+      {compileSources.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
-          {sorted.map((m) => (
+          {compileSources.map((s) => (
             <span
-              key={m.id}
+              key={`${s.markerId}-${s.variantKey}`}
               className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-black/30 px-2.5 py-1 text-[11px] text-white/70"
             >
-              <span className="font-mono text-emerald-400">#{m.targetIndex}</span>
-              {m.label}
+              <span className="font-mono text-emerald-400">#{s.targetIndex}</span>
+              {s.markerLabel}
+              <span className="text-white/35">·</span>
+              <span className="text-white/45">{s.variantLabel}</span>
             </span>
           ))}
         </div>

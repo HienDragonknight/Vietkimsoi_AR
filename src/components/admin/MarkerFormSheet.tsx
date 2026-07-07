@@ -1,10 +1,27 @@
 "use client";
 
 import { AnimatePresence, motion } from "framer-motion";
-import { FileUp, ImagePlus, Loader2, Plus, Trash2, X } from "lucide-react";
-import { useState } from "react";
-import { defaultArticle } from "@/lib/markers/article";
-import type { ArticleSection, MarkerEntry, MarkerRegistry } from "@/lib/markers/types";
+import {
+  FileUp,
+  ImagePlus,
+  Loader2,
+  Sparkles,
+  Trash2,
+  Wand2,
+  X,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { defaultArticle, parseArticlePaste } from "@/lib/markers/article";
+import type {
+  ArticleSection,
+  MarkerEntry,
+  MarkerRegistry,
+} from "@/lib/markers/types";
+import {
+  VARIANT_KEYS,
+  VARIANT_LABELS,
+  type VariantKey,
+} from "@/lib/markers/variants";
 
 interface MarkerFormSheetProps {
   open: boolean;
@@ -12,6 +29,10 @@ interface MarkerFormSheetProps {
   onClose: () => void;
   onSuccess: (registry?: MarkerRegistry) => void;
 }
+
+type SectionDraft = ArticleSection & {
+  imageFile?: File | null;
+};
 
 export function MarkerFormSheet({
   open,
@@ -22,62 +43,109 @@ export function MarkerFormSheet({
   const isEdit = !!marker;
   const initialArticle = marker?.article ?? defaultArticle(marker?.label ?? "");
 
-  const [tab, setTab] = useState<"media" | "content">("media");
   const [label, setLabel] = useState(marker?.label ?? "");
-  const [preview, setPreview] = useState<File | null>(null);
-  const [source, setSource] = useState<File | null>(null);
+  const [variants, setVariants] = useState<Record<VariantKey, File | null>>({
+    onShirt: null,
+    noBackground: null,
+    withBackground: null,
+  });
   const [video, setVideo] = useState<File | null>(null);
-  const [videoCaption, setVideoCaption] = useState(initialArticle.videoCaption);
+  const [pasteText, setPasteText] = useState("");
   const [articleTitle, setArticleTitle] = useState(initialArticle.articleTitle);
-  const [sections, setSections] = useState<ArticleSection[]>(
+  const [sections, setSections] = useState<SectionDraft[]>(
     initialArticle.sections.length > 0
-      ? initialArticle.sections
-      : [{ heading: "GIỚI THIỆU", body: "" }]
+      ? initialArticle.sections.map((s) => ({ ...s, imageFile: null }))
+      : [{ heading: "GIỚI THIỆU", body: "", imageFile: null }]
   );
   const [submitting, setSubmitting] = useState(false);
 
+  const existingVariants = marker?.variants;
+
+  const handleParsePaste = () => {
+    if (!pasteText.trim()) {
+      return alert("Dán nội dung vào ô bên trên trước.");
+    }
+    const parsed = parseArticlePaste(pasteText);
+    if (parsed.articleTitle) setArticleTitle(parsed.articleTitle);
+    if (parsed.sections.length > 0) {
+      setSections(
+        parsed.sections.map((s) => ({
+          ...s,
+          imageFile: null,
+        }))
+      );
+    } else {
+      alert("Không tách được section. Kiểm tra tiêu đề IN HOA (VD: NGUỒN GỐC).");
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!label.trim()) return alert("Nhập tên marker.");
-    if (!isEdit && (!preview || !source || !video)) {
-      return alert("Chọn đủ ảnh preview, ảnh nguồn và video.");
+    if (!label.trim()) return alert("Nhập tên chủ đề (VD: LÚA, SEN, VOI, RỒNG).");
+
+    if (!isEdit) {
+      const missing = VARIANT_KEYS.filter((k) => !variants[k]);
+      if (missing.length > 0) {
+        return alert(`Chọn đủ 3 ảnh marker: ${missing.map((k) => VARIANT_LABELS[k]).join(", ")}`);
+      }
+      if (!video) return alert("Chọn video cho chủ đề này.");
     }
 
     setSubmitting(true);
     try {
       const form = new FormData();
       form.append("label", label.trim());
-      if (preview) form.append("previewImage", preview);
-      if (source) form.append("sourceImage", source);
-      if (video) form.append("video", video);
-      form.append("videoCaption", videoCaption);
       form.append("articleTitle", articleTitle || label.trim());
-      form.append("sectionsJson", JSON.stringify(sections));
+      form.append("videoCaption", "");
+      form.append(
+        "sectionsJson",
+        JSON.stringify(
+          sections.map(({ heading, body, image }) => ({
+            heading,
+            body,
+            image,
+          }))
+        )
+      );
+
+      for (const key of VARIANT_KEYS) {
+        if (variants[key]) form.append(`variant_${key}`, variants[key]!);
+      }
+      if (video) form.append("video", video);
+
+      sections.forEach((section, i) => {
+        if (section.imageFile) {
+          form.append(`sectionImage_${i}`, section.imageFile);
+        }
+      });
 
       const url = isEdit ? `/api/markers/${marker.id}` : "/api/markers";
       const res = await fetch(url, {
         method: isEdit ? "PUT" : "POST",
         body: form,
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Lưu thất bại.");
-      }
-      const data = await res.json();
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? "Lưu thất bại.");
+
       onSuccess(data.registry);
       onClose();
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Lỗi lưu marker.");
+      alert(err instanceof Error ? err.message : "Lỗi lưu chủ đề.");
     } finally {
       setSubmitting(false);
     }
   };
 
-  const updateSection = (index: number, patch: Partial<ArticleSection>) => {
+  const updateSection = (index: number, patch: Partial<SectionDraft>) => {
     setSections((prev) =>
       prev.map((s, i) => (i === index ? { ...s, ...patch } : s))
     );
   };
+
+  const sectionCountLabel = useMemo(
+    () => `${sections.length} section`,
+    [sections.length]
+  );
 
   return (
     <AnimatePresence>
@@ -95,12 +163,17 @@ export function MarkerFormSheet({
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 28, stiffness: 320 }}
-            className="fixed inset-x-0 bottom-0 z-50 flex max-h-[92dvh] flex-col rounded-t-3xl border border-white/10 bg-neutral-900 shadow-2xl sm:left-1/2 sm:max-h-[90dvh] sm:max-w-xl sm:-translate-x-1/2"
+            className="fixed inset-x-0 bottom-0 z-50 flex max-h-[94dvh] flex-col rounded-t-3xl border border-white/10 bg-neutral-900 shadow-2xl sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-h-[92dvh] sm:max-w-3xl sm:rounded-3xl lg:max-w-4xl"
           >
-            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4">
-              <h3 className="text-base font-semibold">
-                {isEdit ? "Sửa marker" : "Thêm marker mới"}
-              </h3>
+            <div className="flex shrink-0 items-center justify-between border-b border-white/10 px-4 py-4 sm:px-6">
+              <div>
+                <h3 className="text-base font-semibold sm:text-lg">
+                  {isEdit ? "Sửa chủ đề AR" : "Thêm chủ đề AR mới"}
+                </h3>
+                <p className="mt-0.5 text-xs text-white/45">
+                  3 marker + 1 video + nội dung tự tách section
+                </p>
+              </div>
               <button
                 type="button"
                 onClick={onClose}
@@ -110,152 +183,184 @@ export function MarkerFormSheet({
               </button>
             </div>
 
-            <div className="flex shrink-0 gap-1 border-b border-white/10 px-4 py-2">
-              {(["media", "content"] as const).map((t) => (
-                <button
-                  key={t}
-                  type="button"
-                  onClick={() => setTab(t)}
-                  className={`flex-1 rounded-lg py-2.5 text-sm font-medium transition ${
-                    tab === t
-                      ? "bg-white text-black"
-                      : "text-white/55 hover:bg-white/5"
-                  }`}
-                >
-                  {t === "media" ? "Media" : "Nội dung trang"}
-                </button>
-              ))}
-            </div>
-
             <form
               onSubmit={handleSubmit}
               className="flex min-h-0 flex-1 flex-col overflow-hidden"
             >
-              <div className="flex-1 space-y-4 overflow-y-auto p-4">
-                {tab === "media" ? (
-                  <>
-                    <Field label="Tên marker *">
-                      <input
-                        value={label}
-                        onChange={(e) => setLabel(e.target.value)}
-                        className="field-input"
-                        placeholder="VD: Lúa - ảnh AR"
-                      />
-                    </Field>
-                    <FilePick
-                      label={isEdit ? "Ảnh preview" : "Ảnh preview *"}
-                      accept="image/*"
-                      icon={<ImagePlus size={18} />}
-                      file={preview}
-                      hint="Thumbnail admin"
-                      onChange={setPreview}
+              <div className="flex-1 space-y-6 overflow-y-auto p-4 sm:p-6">
+                <Field label="Tên chủ đề *">
+                    <input
+                      value={label}
+                      onChange={(e) => {
+                        const next = e.target.value;
+                        setLabel(next);
+                        if (
+                          !articleTitle.trim() ||
+                          articleTitle === marker?.label ||
+                          articleTitle === label
+                        ) {
+                          setArticleTitle(next);
+                        }
+                      }}
+                      className="field-input"
+                      placeholder="VD: LÚA, SEN, VOI, RỒNG"
                     />
-                    <FilePick
-                      label={isEdit ? "Ảnh nguồn" : "Ảnh nguồn *"}
-                      accept="image/*"
-                      icon={<ImagePlus size={18} />}
-                      file={source}
-                      hint="Ảnh in / MindAR compile"
-                      onChange={setSource}
-                    />
-                    <FilePick
-                      label={isEdit ? "Video" : "Video *"}
-                      accept="video/*"
-                      icon={<FileUp size={18} />}
-                      file={video}
-                      hint="Video phía trên trang"
-                      onChange={setVideo}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Field label="Caption trên video">
-                      <input
-                        value={videoCaption}
-                        onChange={(e) => setVideoCaption(e.target.value)}
-                        className="field-input"
-                        placeholder="VD: from the fields that stretch..."
-                      />
-                    </Field>
-                    <Field label="Tiêu đề bài viết">
-                      <input
-                        value={articleTitle}
-                        onChange={(e) => setArticleTitle(e.target.value)}
-                        className="field-input"
-                        placeholder="VD: 🌾 LÚA – HẠT VÀNG..."
-                      />
-                    </Field>
+                </Field>
 
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-white/70">
-                          Các mục nội dung
+                <section className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-semibold text-white/85">
+                      3 ảnh marker (cùng 1 logo)
+                    </h4>
+                    <p className="mt-1 text-xs text-white/45">
+                      Mỗi biến thể = 1 target khi compile. Quét bất kỳ ảnh nào
+                      cũng mở cùng video & bài viết.
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {VARIANT_KEYS.map((key) => (
+                      <VariantPick
+                        key={key}
+                        variantKey={key}
+                        label={VARIANT_LABELS[key]}
+                        file={variants[key]}
+                        existingUrl={existingVariants?.[key]?.sourceImage}
+                        onChange={(f) =>
+                          setVariants((prev) => ({ ...prev, [key]: f }))
+                        }
+                      />
+                    ))}
+                  </div>
+                </section>
+
+                <section>
+                  <FilePick
+                    label={isEdit ? "Video (1 video / chủ đề)" : "Video *"}
+                    accept="video/*"
+                    icon={<FileUp size={18} />}
+                    file={video}
+                    hint="Video phát sau khi quét — VD: Bản sao của Lúa.mp4"
+                    existingUrl={marker?.videoSrc}
+                    onChange={setVideo}
+                  />
+                </section>
+
+                <section className="space-y-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-2">
+                    <div>
+                      <h4 className="flex items-center gap-2 text-sm font-semibold text-amber-100">
+                        <Sparkles size={16} />
+                        Dán nội dung — tự tách section
+                      </h4>
+                      <p className="mt-1 text-xs text-white/50">
+                        Copy từ Google Docs. Dòng IN HOA (NGUỒN GỐC, Ý NGHĨA…)
+                        thành tiêu đề section.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleParsePaste}
+                      className="inline-flex h-10 items-center gap-2 rounded-xl bg-amber-400 px-4 text-sm font-semibold text-black transition active:scale-[0.98]"
+                    >
+                      <Wand2 size={16} />
+                      Tách section
+                    </button>
+                  </div>
+                  <textarea
+                    value={pasteText}
+                    onChange={(e) => setPasteText(e.target.value)}
+                    rows={6}
+                    className="field-input min-h-[140px] resize-y text-sm leading-relaxed"
+                    placeholder={`🌾 LÚA – HẠT VÀNG...\n\nNGUỒN GỐC\nLúa nước gắn liền...\n\nÝ NGHĨA BIỂU TƯỢNG\nHạt lúa là biểu tượng...`}
+                  />
+                </section>
+
+                <section className="space-y-4">
+                  <Field label="Tiêu đề bài viết">
+                    <input
+                      value={articleTitle}
+                      onChange={(e) => setArticleTitle(e.target.value)}
+                      className="field-input"
+                      placeholder="Tiêu đề hiển thị dưới video"
+                    />
+                  </Field>
+
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium text-white/70">
+                      Sections ({sectionCountLabel})
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setSections((s) => [
+                          ...s,
+                          { heading: "MỤC MỚI", body: "", imageFile: null },
+                        ])
+                      }
+                      className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white/70"
+                    >
+                      + Thêm section
+                    </button>
+                  </div>
+
+                  {sections.map((section, i) => (
+                    <div
+                      key={i}
+                      className="space-y-3 rounded-xl border border-white/10 bg-black/25 p-3 sm:p-4"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold">
+                          {i + 1}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setSections((s) => [
-                              ...s,
-                              { heading: "MỤC MỚI", body: "" },
-                            ])
+                        <input
+                          value={section.heading}
+                          onChange={(e) =>
+                            updateSection(i, { heading: e.target.value })
                           }
-                          className="flex items-center gap-1 rounded-lg border border-white/15 px-2.5 py-1.5 text-xs text-white/70"
-                        >
-                          <Plus size={14} />
-                          Thêm mục
-                        </button>
+                          className="field-input flex-1 text-sm"
+                          placeholder="TIÊU ĐỀ (VD: NGUỒN GỐC)"
+                        />
+                        {sections.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setSections((s) => s.filter((_, j) => j !== i))
+                            }
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-rose-500/30 text-rose-300"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        )}
                       </div>
 
-                      {sections.map((section, i) => (
-                        <div
-                          key={i}
-                          className="space-y-2 rounded-xl border border-white/10 bg-black/25 p-3"
-                        >
-                          <div className="flex items-center justify-between gap-2">
-                            <input
-                              value={section.heading}
-                              onChange={(e) =>
-                                updateSection(i, { heading: e.target.value })
-                              }
-                              className="field-input flex-1 text-sm"
-                              placeholder="TIÊU ĐỀ MỤC (VD: NGUỒN GỐC)"
-                            />
-                            {sections.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setSections((s) => s.filter((_, j) => j !== i))
-                                }
-                                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-rose-500/30 text-rose-300"
-                              >
-                                <Trash2 size={15} />
-                              </button>
-                            )}
-                          </div>
-                          <textarea
-                            value={section.body}
-                            onChange={(e) =>
-                              updateSection(i, { body: e.target.value })
-                            }
-                            rows={4}
-                            className="field-input min-h-[100px] resize-y text-sm leading-relaxed"
-                            placeholder="Nội dung đoạn văn. Dùng dòng trống để tách đoạn."
-                          />
-                        </div>
-                      ))}
+                      <textarea
+                        value={section.body}
+                        onChange={(e) =>
+                          updateSection(i, { body: e.target.value })
+                        }
+                        rows={4}
+                        className="field-input min-h-[96px] resize-y text-sm leading-relaxed"
+                        placeholder="Nội dung section..."
+                      />
+
+                      <SectionImagePick
+                        existingUrl={section.image}
+                        file={section.imageFile ?? null}
+                        onChange={(f) => updateSection(i, { imageFile: f })}
+                      />
                     </div>
-                  </>
-                )}
+                  ))}
+                </section>
               </div>
 
-              <div className="shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <div className="shrink-0 border-t border-white/10 p-4 pb-[max(1rem,env(safe-area-inset-bottom))] sm:px-6">
                 <button
                   type="submit"
                   disabled={submitting}
                   className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-white text-sm font-semibold text-black disabled:opacity-50"
                 >
                   {submitting && <Loader2 size={18} className="animate-spin" />}
-                  {isEdit ? "Cập nhật marker" : "Tạo marker"}
+                  {isEdit ? "Cập nhật chủ đề" : "Tạo chủ đề"}
                 </button>
               </div>
             </form>
@@ -281,12 +386,111 @@ function Field({
   );
 }
 
+function VariantPick({
+  variantKey,
+  label,
+  file,
+  existingUrl,
+  onChange,
+}: {
+  variantKey: VariantKey;
+  label: string;
+  file: File | null;
+  existingUrl?: string;
+  onChange: (f: File | null) => void;
+}) {
+  const preview = file
+    ? URL.createObjectURL(file)
+    : existingUrl;
+
+  return (
+    <label className="block cursor-pointer">
+      <span className="mb-1.5 block text-xs font-medium text-white/65">
+        {label}
+      </span>
+      <div className="overflow-hidden rounded-xl border border-dashed border-white/20 bg-black/30">
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={preview}
+            alt={label}
+            className="aspect-[4/3] w-full object-cover"
+          />
+        ) : (
+          <div className="flex aspect-[4/3] flex-col items-center justify-center gap-2 px-3 text-center text-white/45">
+            <ImagePlus size={22} />
+            <span className="text-[11px]">Chọn ảnh</span>
+          </div>
+        )}
+        <div className="border-t border-white/10 px-3 py-2">
+          <p className="truncate text-[11px] text-white/55">
+            {file ? file.name : existingUrl ? "Giữ ảnh hiện tại" : "Chưa chọn"}
+          </p>
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        />
+      </div>
+    </label>
+  );
+}
+
+function SectionImagePick({
+  existingUrl,
+  file,
+  onChange,
+}: {
+  existingUrl?: string;
+  file: File | null;
+  onChange: (f: File | null) => void;
+}) {
+  const preview = file ? URL.createObjectURL(file) : existingUrl;
+
+  return (
+    <label className="block cursor-pointer">
+      <span className="mb-1.5 block text-xs text-white/50">
+        Ảnh minh họa section (tùy chọn)
+      </span>
+      <div className="flex items-center gap-3 rounded-xl border border-dashed border-white/15 bg-black/20 px-3 py-2.5">
+        {preview ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={preview}
+            alt=""
+            className="h-14 w-14 shrink-0 rounded-lg object-cover"
+          />
+        ) : (
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white/5 text-white/40">
+            <ImagePlus size={18} />
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm">
+            {file ? file.name : existingUrl ? "Đổi ảnh section" : "Thêm ảnh"}
+          </p>
+          <p className="text-[11px] text-white/40">1 ảnh / 1 section nội dung</p>
+        </div>
+        <input
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={(e) => onChange(e.target.files?.[0] ?? null)}
+        />
+      </div>
+    </label>
+  );
+}
+
 function FilePick({
   label,
   accept,
   icon,
   file,
   hint,
+  existingUrl,
   onChange,
 }: {
   label: string;
@@ -294,6 +498,7 @@ function FilePick({
   icon: React.ReactNode;
   file: File | null;
   hint: string;
+  existingUrl?: string;
   onChange: (f: File | null) => void;
 }) {
   return (
@@ -302,7 +507,13 @@ function FilePick({
       <div className="flex min-h-[56px] items-center gap-3 rounded-xl border border-dashed border-white/20 bg-black/25 px-4 py-3 active:bg-black/40">
         <span className="text-white/60">{icon}</span>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm">{file ? file.name : "Chạm để chọn file"}</p>
+          <p className="truncate text-sm">
+            {file
+              ? file.name
+              : existingUrl
+              ? "Giữ video hiện tại — chạm để thay"
+              : "Chạm để chọn file"}
+          </p>
           <p className="text-xs text-white/40">{hint}</p>
         </div>
         <input

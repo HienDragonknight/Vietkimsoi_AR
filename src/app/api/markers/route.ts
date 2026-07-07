@@ -1,15 +1,20 @@
 import { NextResponse } from "next/server";
 import {
   generateMarkerId,
+  markerUploadDir,
   publicUrlFromUpload,
   readRegistry,
   reindexMarkers,
   saveUploadedFile,
   writeRegistry,
-  markerUploadDir,
 } from "@/lib/markers/store";
 import type { MarkerEntry } from "@/lib/markers/types";
 import { defaultArticle, parseArticleFromForm } from "@/lib/markers/article";
+import {
+  mergeSectionImages,
+  pathExt,
+  saveVariantFiles,
+} from "@/lib/markers/form";
 
 export async function GET() {
   const registry = await readRegistry();
@@ -21,19 +26,10 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const label = String(form.get("label") ?? "").trim();
     if (!label) {
-      return NextResponse.json({ error: "Tên marker là bắt buộc." }, { status: 400 });
+      return NextResponse.json({ error: "Tên chủ đề là bắt buộc." }, { status: 400 });
     }
 
-    const previewFile = form.get("previewImage");
-    const sourceFile = form.get("sourceImage");
     const videoFile = form.get("video");
-
-    if (!(previewFile instanceof File) || previewFile.size === 0) {
-      return NextResponse.json({ error: "Ảnh preview là bắt buộc." }, { status: 400 });
-    }
-    if (!(sourceFile instanceof File) || sourceFile.size === 0) {
-      return NextResponse.json({ error: "Ảnh nguồn (để in/quét) là bắt buộc." }, { status: 400 });
-    }
     if (!(videoFile instanceof File) || videoFile.size === 0) {
       return NextResponse.json({ error: "Video là bắt buộc." }, { status: 400 });
     }
@@ -43,31 +39,28 @@ export async function POST(request: Request) {
     const dir = markerUploadDir(id);
     const now = new Date().toISOString();
 
-    const previewExt = pathExt(previewFile.name, ".jpg");
-    const sourceExt = pathExt(sourceFile.name, ".jpg");
+    const variants = await saveVariantFiles(form, dir);
     const videoExt = pathExt(videoFile.name, ".mp4");
+    const videoSrc = publicUrlFromUpload(
+      await saveUploadedFile(videoFile, `${dir}/video${videoExt}`)
+    );
 
-    const previewPath = await saveUploadedFile(
-      previewFile,
-      `${dir}/preview${previewExt}`
-    );
-    const sourcePath = await saveUploadedFile(
-      sourceFile,
-      `${dir}/source${sourceExt}`
-    );
-    const videoPath = await saveUploadedFile(
-      videoFile,
-      `${dir}/video${videoExt}`
-    );
+    const articleBase = parseArticleFromForm(form, defaultArticle(label));
+    const article = {
+      ...articleBase,
+      sections: await mergeSectionImages(form, articleBase.sections, dir),
+    };
 
     const entry: MarkerEntry = {
       id,
       label,
-      targetIndex: registry.markers.length,
-      previewImage: publicUrlFromUpload(previewPath),
-      sourceImage: publicUrlFromUpload(sourcePath),
-      videoSrc: publicUrlFromUpload(videoPath),
-      article: parseArticleFromForm(form, defaultArticle(label)),
+      targetIndex: registry.markers.length * 3,
+      targetIndices: [],
+      previewImage: variants.withBackground.previewImage,
+      sourceImage: variants.withBackground.sourceImage,
+      videoSrc,
+      variants,
+      article,
       createdAt: now,
       updatedAt: now,
     };
@@ -75,14 +68,14 @@ export async function POST(request: Request) {
     registry.markers = reindexMarkers([...registry.markers, entry]);
     await writeRegistry(registry);
 
-    return NextResponse.json({ marker: entry, registry }, { status: 201 });
+    return NextResponse.json(
+      { marker: registry.markers.find((m) => m.id === id), registry },
+      { status: 201 }
+    );
   } catch (err) {
     console.error("[POST /api/markers]", err);
-    return NextResponse.json({ error: "Không thể tạo marker." }, { status: 500 });
+    const message =
+      err instanceof Error ? err.message : "Không thể tạo chủ đề.";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
-}
-
-function pathExt(filename: string, fallback: string): string {
-  const ext = filename.includes(".") ? `.${filename.split(".").pop()}` : fallback;
-  return ext.toLowerCase();
 }

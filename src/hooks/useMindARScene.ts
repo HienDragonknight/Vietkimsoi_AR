@@ -45,20 +45,78 @@ interface AframeSceneElement extends HTMLElement {
   addEventListener: HTMLElement["addEventListener"];
 }
 
+function applyVideoPlaybackAttrs(video: HTMLVideoElement) {
+  video.setAttribute("playsinline", "");
+  video.setAttribute("webkit-playsinline", "");
+  video.muted = true;
+  video.autoplay = true;
+  video.playsInline = true;
+}
+
+/** Keep MindAR camera video visible — especially on iOS where the WebGL canvas is opaque. */
 function styleCameraVideos(container: HTMLElement, sceneEl: Element | null) {
   const videos = [
     ...container.querySelectorAll("video"),
     ...(sceneEl?.querySelectorAll("video") ?? []),
   ];
   videos.forEach((video) => {
-    video.style.position = "absolute";
-    video.style.inset = "0";
-    video.style.width = "100%";
-    video.style.height = "100%";
-    video.style.objectFit = "cover";
-    video.style.zIndex = "0";
+    applyVideoPlaybackAttrs(video);
+    // MindAR sets z-index:-2 inline; lift feed above the (hidden) canvas layer.
+    video.style.zIndex = "2";
     video.style.visibility = "visible";
     video.style.opacity = "1";
+    video.style.pointerEvents = "none";
+  });
+
+  const canvases = [
+    ...container.querySelectorAll("canvas"),
+    ...(sceneEl?.querySelectorAll("canvas") ?? []),
+  ];
+  canvases.forEach((canvas) => {
+    const el = canvas as HTMLCanvasElement;
+    // Scan page has no visible 3D content — hide canvas so live camera shows on mobile.
+    el.style.zIndex = "1";
+    el.style.pointerEvents = "none";
+    el.style.opacity = "0";
+  });
+}
+
+function triggerMindARResize() {
+  window.dispatchEvent(new Event("resize"));
+}
+
+async function ensureVideosPlaying(container: HTMLElement, sceneEl: Element | null) {
+  const videos = [
+    ...container.querySelectorAll("video"),
+    ...(sceneEl?.querySelectorAll("video") ?? []),
+  ];
+  await Promise.all(
+    videos.map(async (video) => {
+      try {
+        await video.play();
+      } catch {
+        // Retry once — iOS may need playsinline attributes applied first.
+        try {
+          await video.play();
+        } catch {
+          // Handled by stream verification below.
+        }
+      }
+    })
+  );
+}
+
+function hasActiveCameraStream(container: HTMLElement, sceneEl: Element | null): boolean {
+  const videos = [
+    ...container.querySelectorAll("video"),
+    ...(sceneEl?.querySelectorAll("video") ?? []),
+  ];
+  return Array.from(videos).some((video) => {
+    const stream = video.srcObject as MediaStream | null;
+    if (!stream) return false;
+    return stream
+      .getVideoTracks()
+      .some((track) => track.readyState === "live" && track.enabled);
   });
 }
 
@@ -87,7 +145,9 @@ function readTargetIndex(el: Element, fallback: number): number {
  */
 export function useMindARScene(
   containerRef: React.RefObject<HTMLDivElement | null>,
-  config: PublicMarkerConfig | null
+  config: PublicMarkerConfig | null,
+  /** Must be true after a user tap on mobile — getUserMedia requires a gesture. */
+  enabled = true
 ) {
   const [status, setStatus] = useState<MindARStatus>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -97,11 +157,12 @@ export function useMindARScene(
   const [detectedLabel, setDetectedLabel] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!config || config.markers.length === 0) return;
+    if (!enabled || !config || config.markers.length === 0) return;
 
     let cancelled = false;
     let sceneEl: AframeSceneElement | null = null;
     const container = containerRef.current;
+    let onResize: (() => void) | null = null;
 
     const activeTargets = new Set<number>();
     let lastSeenIndex: number | null = null;
@@ -161,10 +222,15 @@ export function useMindARScene(
           Math.max(1, Math.min(config.markers.length, MIND_AR_CONFIG.maxTrack));
 
         const targetEntities = config.markers
-          .map(
-            (m) =>
-              `<a-entity id="ar-target-${m.targetIndex}" mindar-image-target="targetIndex: ${m.targetIndex}"></a-entity>`
-          )
+          .flatMap((m) => {
+            const indices = m.targetIndices?.length
+              ? m.targetIndices
+              : [m.targetIndex];
+            return indices.map(
+              (idx) =>
+                `<a-entity id="ar-target-${idx}" mindar-image-target="targetIndex: ${idx}"></a-entity>`
+            );
+          })
           .join("\n");
 
         const mindarAttr =
@@ -181,7 +247,8 @@ export function useMindARScene(
             mindar-image="${mindarAttr}"
             color-space="sRGB"
             embedded
-            renderer="alpha: true; antialias: true; colorManagement: true"
+            renderer="alpha: true; antialias: true; colorManagement: true; preserveDrawingBuffer: true"
+            background="color: transparent"
             vr-mode-ui="enabled: false"
             device-orientation-permission-ui="enabled: false"
             style="width:100%;height:100%;background:transparent;"
@@ -194,52 +261,80 @@ export function useMindARScene(
         sceneEl = container.querySelector("a-scene");
         if (!sceneEl) throw new Error("Không thể khởi tạo cảnh nhận diện.");
 
+        onResize = () => styleCameraVideos(container, sceneEl);
+        window.addEventListener("resize", onResize);
+
         config.markers.forEach((marker) => {
-          const targetEl = container.querySelector(
-            `#ar-target-${marker.targetIndex}`
-          );
-          if (!targetEl) return;
+          const indices = marker.targetIndices?.length
+            ? marker.targetIndices
+            : [marker.targetIndex];
 
-          targetEl.addEventListener("targetFound", () => {
-            const idx = readTargetIndex(targetEl, marker.targetIndex);
-            activeTargets.add(idx);
-            if (DEBUG_MINDAR) {
-              console.log(`[MindAR-aframe] target ${idx} found (${marker.label})`);
-            }
-            scheduleConfirm(idx, marker.label);
-          });
+          indices.forEach((idx) => {
+            const targetEl = container.querySelector(`#ar-target-${idx}`);
+            if (!targetEl) return;
 
-          targetEl.addEventListener("targetLost", () => {
-            const idx = readTargetIndex(targetEl, marker.targetIndex);
-            if (DEBUG_MINDAR) {
-              console.log(`[MindAR-aframe] target ${idx} lost`);
-            }
-            onTargetLost(idx);
+            targetEl.addEventListener("targetFound", () => {
+              const parsedIdx = readTargetIndex(targetEl, idx);
+              activeTargets.add(parsedIdx);
+              if (DEBUG_MINDAR) {
+                console.log(
+                  `[MindAR-aframe] target ${parsedIdx} found (${marker.label})`
+                );
+              }
+              scheduleConfirm(parsedIdx, marker.label);
+            });
+
+            targetEl.addEventListener("targetLost", () => {
+              const parsedIdx = readTargetIndex(targetEl, idx);
+              if (DEBUG_MINDAR) {
+                console.log(`[MindAR-aframe] target ${parsedIdx} lost`);
+              }
+              onTargetLost(parsedIdx);
+            });
           });
         });
 
         sceneEl.addEventListener("arReady", () => {
           if (cancelled) return;
-          styleCameraVideos(container, sceneEl);
-          if (DEBUG_MINDAR) {
-            console.log(
-              `[MindAR-aframe] arReady | markers=${config.markers.length} maxTrack=${maxTrack}`
-            );
-          }
-          setStatus("scanning");
+
+          void (async () => {
+            triggerMindARResize();
+            styleCameraVideos(container, sceneEl);
+            await ensureVideosPlaying(container, sceneEl);
+
+            if (!hasActiveCameraStream(container, sceneEl)) {
+              await new Promise((r) => setTimeout(r, 900));
+            }
+            triggerMindARResize();
+            styleCameraVideos(container, sceneEl);
+            await ensureVideosPlaying(container, sceneEl);
+
+            if (cancelled) return;
+
+            if (!hasActiveCameraStream(container, sceneEl)) {
+              setStatus("error");
+              setErrorMessage(
+                "Camera chưa bật. Trên điện thoại hãy nhấn nút bật camera, dùng Safari/Chrome và cho phép quyền Camera."
+              );
+              return;
+            }
+
+            if (DEBUG_MINDAR) {
+              console.log(
+                `[MindAR-aframe] arReady | markers=${config.markers.length} maxTrack=${maxTrack}`
+              );
+            }
+            setStatus("scanning");
+          })();
         });
 
         sceneEl.addEventListener("arError", () => {
           if (cancelled) return;
           setStatus("error");
-          setErrorMessage("Không thể khởi động camera nhận diện.");
+          setErrorMessage(
+            "Không thể khởi động camera. Hãy kiểm tra quyền Camera trong Cài đặt trình duyệt."
+          );
         });
-
-        setTimeout(() => {
-          if (!cancelled) {
-            setStatus((s) => (s === "loading" || s === "idle" ? "scanning" : s));
-          }
-        }, 2500);
       } catch (err) {
         if (cancelled) return;
         setStatus("error");
@@ -258,6 +353,7 @@ export function useMindARScene(
       cancelled = true;
       if (confirmTimer) clearTimeout(confirmTimer);
       activeTargets.clear();
+      if (onResize) window.removeEventListener("resize", onResize);
       try {
         sceneEl?.systems?.["mindar-image"]?.stop?.();
       } catch {
@@ -265,7 +361,7 @@ export function useMindARScene(
       }
       if (container) container.innerHTML = "";
     };
-  }, [containerRef, config]);
+  }, [containerRef, config, enabled]);
 
   return { status, errorMessage, detectedTargetIndex, detectedLabel };
 }

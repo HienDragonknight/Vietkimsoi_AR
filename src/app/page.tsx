@@ -11,6 +11,7 @@ import { ScanOverlay } from "@/components/ScanOverlay";
 import { StatusToast } from "@/components/StatusToast";
 import { useMindARScene } from "@/hooks/useMindARScene";
 import { getMarkerIdByTargetIndex } from "@/lib/markers/utils";
+import { needsCameraUserGesture } from "@/lib/device";
 import type { PublicMarkerConfig } from "@/lib/markers/types";
 import type { ToastMessage } from "@/types";
 
@@ -21,11 +22,22 @@ export default function ScanPage() {
     null
   );
   const [configError, setConfigError] = useState<string | null>(null);
+  const [needsCameraTap, setNeedsCameraTap] = useState(false);
+  const [cameraStarted, setCameraStarted] = useState(false);
+  const [bootGeneration, setBootGeneration] = useState(0);
+
+  const cameraEnabled = cameraStarted && !!markerConfig;
 
   const { status: mindARStatus, errorMessage: mindARError, detectedTargetIndex, detectedLabel } =
-    useMindARScene(containerRef, markerConfig);
+    useMindARScene(containerRef, markerConfig, cameraEnabled);
 
   const [isMismatched, setIsMismatched] = useState(false);
+
+  useEffect(() => {
+    const needsTap = needsCameraUserGesture();
+    setNeedsCameraTap(needsTap);
+    if (!needsTap) setCameraStarted(true);
+  }, []);
 
   useEffect(() => {
     fetch("/api/markers/config")
@@ -102,11 +114,29 @@ export default function ScanPage() {
           id: "error",
           variant: "error",
           message: mindARError ?? "Không thể nhận diện hình ảnh.",
+          messageMobile: needsCameraTap
+            ? "Camera lỗi. Nhấn nút bật camera bên dưới."
+            : undefined,
         };
       default:
         return null;
     }
-  }, [mindARStatus, mindARError, isMismatched, configError, detectedLabel]);
+  }, [mindARStatus, mindARError, isMismatched, configError, detectedLabel, needsCameraTap]);
+
+  const handleStartCamera = () => {
+    setCameraStarted(false);
+    setBootGeneration((n) => n + 1);
+    requestAnimationFrame(() => setCameraStarted(true));
+  };
+
+  const showCameraGate =
+    needsCameraTap && !cameraStarted && !configError && !!markerConfig;
+  const showLoading =
+    !!markerConfig &&
+    cameraStarted &&
+    (mindARStatus === "idle" || mindARStatus === "loading");
+  const showRetryCamera =
+    needsCameraTap && mindARStatus === "error" && !!markerConfig;
 
   const handleClose = () => {
     if (typeof window !== "undefined" && window.history.length > 1) {
@@ -116,20 +146,38 @@ export default function ScanPage() {
 
   return (
     <main className="relative h-[100dvh] w-screen overflow-hidden bg-black">
-      <div ref={containerRef} className="ar-camera-root absolute inset-0 z-0" />
+      <div
+        key={bootGeneration}
+        ref={containerRef}
+        className="ar-camera-root absolute inset-0 z-0"
+      />
 
       <AnimatePresence>
-        {(!markerConfig || mindARStatus === "idle" || mindARStatus === "loading") && (
+        {(!markerConfig || showLoading) && (
           <LoadingScreen key="ar-loading" subtitle="Đang khởi động nhận diện..." />
         )}
       </AnimatePresence>
+
+      {showCameraGate && (
+        <div className="absolute inset-0 z-[45] flex flex-col items-center justify-center gap-5 bg-black/90 px-6 text-center text-white">
+          <p className="text-[15px] font-medium">Cần bật camera để quét AR</p>
+          <p className="max-w-sm text-[13px] text-white/55">
+            Trên điện thoại, trình duyệt chỉ mở camera sau khi bạn nhấn nút.
+          </p>
+          <ScanButton
+            onClick={handleStartCamera}
+            label="Bật camera & quét"
+            className="w-full max-w-xs text-[14px]"
+          />
+        </div>
+      )}
 
       <StatusToast toast={toast} />
 
       <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4">
         <ScanOverlay
           responsive
-          animated={mindARStatus !== "found"}
+          animated={mindARStatus !== "found" && cameraStarted}
           variant={
             mindARStatus === "found"
               ? "success"
@@ -141,27 +189,38 @@ export default function ScanPage() {
       </div>
 
       <div className="safe-bottom absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-8">
-        <ScanButton
-          className="w-full max-w-md text-[13px] sm:text-[15px]"
-          loading={mindARStatus === "loading" || mindARStatus === "scanning"}
-          disabled={true}
-          variant={
-            mindARStatus === "found"
-              ? "success"
-              : isMismatched
-              ? "warning"
-              : "normal"
-          }
-          label={
-            mindARStatus === "loading" || mindARStatus === "idle"
-              ? "Đang khởi chạy nhận diện..."
-              : mindARStatus === "found"
-              ? "Đã khớp ảnh thành công!"
-              : isMismatched
-              ? "Không phải ảnh đúng. Căn chỉnh lại!"
-              : "Đang tự động quét ảnh..."
-          }
-        />
+        {showRetryCamera ? (
+          <ScanButton
+            onClick={handleStartCamera}
+            variant="warning"
+            className="w-full max-w-md text-[13px] sm:text-[15px]"
+            label="Bật lại camera"
+          />
+        ) : (
+          <ScanButton
+            className="w-full max-w-md text-[13px] sm:text-[15px]"
+            loading={mindARStatus === "loading" || mindARStatus === "scanning"}
+            disabled={true}
+            variant={
+              mindARStatus === "found"
+                ? "success"
+                : isMismatched
+                ? "warning"
+                : "normal"
+            }
+            label={
+              showCameraGate
+                ? "Nhấn nút bật camera ở giữa màn hình"
+                : mindARStatus === "loading" || mindARStatus === "idle"
+                ? "Đang khởi chạy nhận diện..."
+                : mindARStatus === "found"
+                ? "Đã khớp ảnh thành công!"
+                : isMismatched
+                ? "Không phải ảnh đúng. Căn chỉnh lại!"
+                : "Đang tự động quét ảnh..."
+            }
+          />
+        )}
       </div>
 
       <div className="safe-top safe-right absolute right-0 top-0 z-50 flex items-center gap-1.5 px-2 sm:gap-2 sm:px-0">

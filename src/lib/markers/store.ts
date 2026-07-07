@@ -2,6 +2,11 @@ import { promises as fs } from "fs";
 import path from "path";
 import type { MarkerEntry, MarkerRegistry } from "./types";
 import { normalizeMarkerArticle } from "./article";
+import {
+  VARIANTS_PER_MARKER,
+  legacyVariantsFromEntry,
+  normalizeMarkerEntry,
+} from "./variants";
 
 const DATA_DIR = path.join(process.cwd(), "data");
 const REGISTRY_PATH = path.join(DATA_DIR, "markers.json");
@@ -25,11 +30,22 @@ export async function readRegistry(): Promise<MarkerRegistry> {
   try {
     const raw = await fs.readFile(REGISTRY_PATH, "utf-8");
     const data = JSON.parse(raw) as MarkerRegistry;
-    data.markers = (data.markers ?? []).map((m) => ({
-      ...m,
-      article: normalizeMarkerArticle(m.label, m.article),
-    }));
-    return data;
+    let markers = (data.markers ?? []).map((m) =>
+      normalizeMarkerEntry({
+        ...m,
+        article: normalizeMarkerArticle(m.label, m.article),
+      })
+    );
+
+    const needsReindex = markers.some(
+      (m, i) => m.targetIndices[0] !== i * VARIANTS_PER_MARKER
+    );
+    if (needsReindex) {
+      markers = reindexMarkers(markers);
+      await writeRegistry({ ...data, markers });
+    }
+
+    return { ...data, markers };
   } catch {
     return { ...DEFAULT_REGISTRY };
   }
@@ -54,13 +70,28 @@ export async function saveUploadedFile(
   return destPath;
 }
 
-/** Reassign contiguous targetIndex values (0..n-1) after add/delete/reorder. */
+/** Reassign contiguous targetIndex values — 3 indices per heritage item. */
 export function reindexMarkers(markers: MarkerEntry[]): MarkerEntry[] {
-  return markers.map((m, index) => ({
-    ...m,
-    targetIndex: index,
-    updatedAt: new Date().toISOString(),
-  }));
+  let nextIndex = 0;
+
+  return markers.map((m) => {
+    const variants = m.variants ?? legacyVariantsFromEntry(m);
+    const targetIndices = Array.from(
+      { length: VARIANTS_PER_MARKER },
+      (_, i) => nextIndex + i
+    );
+    nextIndex += VARIANTS_PER_MARKER;
+
+    return normalizeMarkerEntry({
+      ...m,
+      variants,
+      targetIndex: targetIndices[0],
+      targetIndices,
+      previewImage: variants.withBackground.previewImage,
+      sourceImage: variants.withBackground.sourceImage,
+      updatedAt: new Date().toISOString(),
+    });
+  });
 }
 
 export function generateMarkerId(): string {

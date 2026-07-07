@@ -99,10 +99,10 @@ export default function AdminPage() {
           <div className="mb-4 flex items-center justify-between gap-3">
             <div>
               <h2 className="text-sm font-semibold sm:text-base">
-                Danh sách marker
+                Danh sách chủ đề AR
               </h2>
               <p className="mt-0.5 text-xs text-white/45">
-                Kéo thứ tự ↑↓ = thứ tự compile index
+                Mỗi chủ đề = 3 marker + 1 video + bài viết · ↑↓ = thứ tự compile
               </p>
             </div>
             <button
@@ -111,7 +111,7 @@ export default function AdminPage() {
               className="hidden h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black transition active:scale-95 sm:flex"
             >
               <Plus size={16} />
-              Thêm marker
+              Thêm chủ đề
             </button>
           </div>
 
@@ -137,7 +137,7 @@ export default function AdminPage() {
                 className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-white px-5 text-sm font-semibold text-black"
               >
                 <Plus size={16} />
-                Thêm marker đầu tiên
+                Thêm chủ đề đầu tiên
               </button>
             </div>
           )}
