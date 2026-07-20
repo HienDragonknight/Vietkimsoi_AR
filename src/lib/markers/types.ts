@@ -63,5 +63,6 @@ export interface PublicMarkerConfig {
     targetIndices: number[];
     videoSrc: string;
     previewImage: string;
+    article?: MarkerArticle;
   }>;
 }

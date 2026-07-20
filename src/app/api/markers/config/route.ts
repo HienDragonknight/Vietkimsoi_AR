@@ -18,6 +18,7 @@ export async function GET() {
       targetIndices: m.targetIndices,
       videoSrc: m.videoSrc,
       previewImage: m.previewImage,
+      article: m.article,
     })),
   };
 

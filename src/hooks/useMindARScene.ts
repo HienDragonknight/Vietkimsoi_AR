@@ -53,31 +53,43 @@ function applyVideoPlaybackAttrs(video: HTMLVideoElement) {
   video.playsInline = true;
 }
 
-/** Keep MindAR camera video visible — especially on iOS where the WebGL canvas is opaque. */
+/** Keep MindAR camera video visible and fill 100% of viewport — especially on mobile devices. */
 function styleCameraVideos(container: HTMLElement, sceneEl: Element | null) {
   const videos = [
-    ...container.querySelectorAll("video"),
-    ...(sceneEl?.querySelectorAll("video") ?? []),
+    ...Array.from(container.querySelectorAll<HTMLVideoElement>("video")),
+    ...Array.from(sceneEl?.querySelectorAll<HTMLVideoElement>("video") ?? []),
+    ...Array.from(document.querySelectorAll<HTMLVideoElement>(".ar-camera-root video")),
   ];
   videos.forEach((video) => {
     applyVideoPlaybackAttrs(video);
-    // MindAR sets z-index:-2 inline; lift feed above the (hidden) canvas layer.
-    video.style.zIndex = "2";
-    video.style.visibility = "visible";
-    video.style.opacity = "1";
-    video.style.pointerEvents = "none";
+    video.style.setProperty("position", "absolute", "important");
+    video.style.setProperty("top", "0", "important");
+    video.style.setProperty("left", "0", "important");
+    video.style.setProperty("width", "100%", "important");
+    video.style.setProperty("height", "100%", "important");
+    video.style.setProperty("margin", "0", "important");
+    video.style.setProperty("z-index", "2", "important");
+    video.style.setProperty("visibility", "visible", "important");
+    video.style.setProperty("opacity", "1", "important");
+    video.style.setProperty("pointer-events", "none", "important");
+    video.style.setProperty("object-fit", "cover", "important");
   });
 
   const canvases = [
     ...container.querySelectorAll("canvas"),
     ...(sceneEl?.querySelectorAll("canvas") ?? []),
+    ...document.querySelectorAll(".ar-camera-root canvas"),
   ];
   canvases.forEach((canvas) => {
     const el = canvas as HTMLCanvasElement;
-    // Scan page has no visible 3D content — hide canvas so live camera shows on mobile.
-    el.style.zIndex = "1";
-    el.style.pointerEvents = "none";
-    el.style.opacity = "0";
+    el.style.setProperty("position", "absolute", "important");
+    el.style.setProperty("top", "0", "important");
+    el.style.setProperty("left", "0", "important");
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("height", "100%", "important");
+    el.style.setProperty("z-index", "1", "important");
+    el.style.setProperty("pointer-events", "none", "important");
+    el.style.setProperty("opacity", "0", "important");
   });
 }
 
@@ -356,6 +368,13 @@ export function useMindARScene(
       if (onResize) window.removeEventListener("resize", onResize);
       try {
         sceneEl?.systems?.["mindar-image"]?.stop?.();
+        const renderer = (
+          sceneEl as unknown as {
+            renderer?: { dispose?: () => void; forceContextLoss?: () => void };
+          }
+        )?.renderer;
+        renderer?.dispose?.();
+        renderer?.forceContextLoss?.();
       } catch {
         // ignore
       }

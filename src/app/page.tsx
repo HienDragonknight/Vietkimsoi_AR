@@ -10,6 +10,8 @@ import { ScanButton } from "@/components/ScanButton";
 import { ScanOverlay } from "@/components/ScanOverlay";
 import { StatusToast } from "@/components/StatusToast";
 import { useMindARScene } from "@/hooks/useMindARScene";
+import { ArVideoOverlay } from "@/components/ArVideoOverlay";
+import { normalizeMarkerArticle } from "@/lib/markers/article";
 import { getMarkerIdByTargetIndex } from "@/lib/markers/utils";
 import { needsCameraUserGesture } from "@/lib/device";
 import type { PublicMarkerConfig } from "@/lib/markers/types";
@@ -25,13 +27,12 @@ export default function ScanPage() {
   const [needsCameraTap, setNeedsCameraTap] = useState(false);
   const [cameraStarted, setCameraStarted] = useState(false);
   const [bootGeneration, setBootGeneration] = useState(0);
+  const [activeMarkerId, setActiveMarkerId] = useState<string | null>(null);
 
   const cameraEnabled = cameraStarted && !!markerConfig;
 
   const { status: mindARStatus, errorMessage: mindARError, detectedTargetIndex, detectedLabel } =
     useMindARScene(containerRef, markerConfig, cameraEnabled);
-
-  const [isMismatched, setIsMismatched] = useState(false);
 
   useEffect(() => {
     const needsTap = needsCameraUserGesture();
@@ -52,34 +53,29 @@ export default function ScanPage() {
   }, []);
 
   useEffect(() => {
-    if (mindARStatus !== "scanning") {
-      setIsMismatched(false);
-      return;
-    }
-    const timer = setTimeout(() => setIsMismatched(true), 6000);
-    return () => clearTimeout(timer);
-  }, [mindARStatus]);
-
-  useEffect(() => {
     if (mindARStatus !== "found" || detectedTargetIndex === null || !markerConfig) {
       return;
     }
     const id = getMarkerIdByTargetIndex(markerConfig, detectedTargetIndex);
-    if (id) router.push(`/ar-video/${id}`);
-  }, [mindARStatus, detectedTargetIndex, markerConfig, router]);
+    if (id) {
+      setActiveMarkerId(id);
+      if (typeof window !== "undefined" && window.location.pathname !== `/ar-video/${id}`) {
+        window.history.pushState({ arMarkerId: id }, "", `/ar-video/${id}`);
+      }
+    }
+  }, [mindARStatus, detectedTargetIndex, markerConfig]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setActiveMarkerId(null);
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, []);
 
   const toast = useMemo<ToastMessage | null>(() => {
     if (configError) {
       return { id: "cfg-error", variant: "error", message: configError };
-    }
-    if (isMismatched) {
-      return {
-        id: "mismatch",
-        variant: "error",
-        message:
-          "Ảnh đang quét không khớp marker nào. Hãy căn chỉnh đúng ảnh in và thử lại.",
-        messageMobile: "Ảnh không khớp. Căn chỉnh lại ảnh in.",
-      };
     }
 
     switch (mindARStatus) {
@@ -121,7 +117,7 @@ export default function ScanPage() {
       default:
         return null;
     }
-  }, [mindARStatus, mindARError, isMismatched, configError, detectedLabel, needsCameraTap]);
+  }, [mindARStatus, mindARError, configError, detectedLabel, needsCameraTap]);
 
   const handleStartCamera = () => {
     setCameraStarted(false);
@@ -138,10 +134,20 @@ export default function ScanPage() {
   const showRetryCamera =
     needsCameraTap && mindARStatus === "error" && !!markerConfig;
 
-  const handleClose = () => {
-    if (typeof window !== "undefined" && window.history.length > 1) {
-      router.back();
+  const activeMarker = useMemo(() => {
+    if (!markerConfig || !activeMarkerId) return null;
+    return markerConfig.markers.find((m) => m.id === activeMarkerId) ?? null;
+  }, [markerConfig, activeMarkerId]);
+
+  const handleCloseOverlay = () => {
+    setActiveMarkerId(null);
+    if (typeof window !== "undefined" && window.location.pathname !== "/") {
+      window.history.replaceState(null, "", "/");
     }
+  };
+
+  const handleClose = () => {
+    handleCloseOverlay();
   };
 
   return (
@@ -172,66 +178,71 @@ export default function ScanPage() {
         </div>
       )}
 
-      <StatusToast toast={toast} />
+      {!activeMarker && <StatusToast toast={toast} />}
 
-      <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4">
-        <ScanOverlay
-          responsive
-          animated={mindARStatus !== "found" && cameraStarted}
-          variant={
-            mindARStatus === "found"
-              ? "success"
-              : isMismatched
-              ? "warning"
-              : "normal"
-          }
-        />
-      </div>
-
-      <div className="safe-bottom absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-8">
-        {showRetryCamera ? (
-          <ScanButton
-            onClick={handleStartCamera}
-            variant="warning"
-            className="w-full max-w-md text-[13px] sm:text-[15px]"
-            label="Bật lại camera"
+      {!activeMarker && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4">
+          <ScanOverlay
+            responsive
+            animated={mindARStatus !== "found" && cameraStarted}
+            variant={mindARStatus === "found" ? "success" : "normal"}
           />
-        ) : (
-          <ScanButton
-            className="w-full max-w-md text-[13px] sm:text-[15px]"
-            loading={mindARStatus === "loading" || mindARStatus === "scanning"}
-            disabled={true}
-            variant={
-              mindARStatus === "found"
-                ? "success"
-                : isMismatched
-                ? "warning"
-                : "normal"
-            }
-            label={
-              showCameraGate
-                ? "Nhấn nút bật camera ở giữa màn hình"
-                : mindARStatus === "loading" || mindARStatus === "idle"
-                ? "Đang khởi chạy nhận diện..."
-                : mindARStatus === "found"
-                ? "Đã khớp ảnh thành công!"
-                : isMismatched
-                ? "Không phải ảnh đúng. Căn chỉnh lại!"
-                : "Đang tự động quét ảnh..."
-            }
+        </div>
+      )}
+
+      {!activeMarker && (
+        <div className="safe-bottom absolute inset-x-0 bottom-0 z-20 flex justify-center px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] sm:pb-8">
+          {showRetryCamera ? (
+            <ScanButton
+              onClick={handleStartCamera}
+              variant="warning"
+              className="w-full max-w-md text-[13px] sm:text-[15px]"
+              label="Bật lại camera"
+            />
+          ) : (
+            <ScanButton
+              className="w-full max-w-md text-[13px] sm:text-[15px]"
+              loading={mindARStatus === "loading" || mindARStatus === "scanning"}
+              disabled={true}
+              variant={mindARStatus === "found" ? "success" : "normal"}
+              label={
+                showCameraGate
+                  ? "Nhấn nút bật camera ở giữa màn hình"
+                  : mindARStatus === "loading" || mindARStatus === "idle"
+                  ? "Đang khởi chạy nhận diện..."
+                  : mindARStatus === "found"
+                  ? "Đã khớp ảnh thành công!"
+                  : "Đang tự động quét ảnh..."
+              }
+            />
+          )}
+        </div>
+      )}
+
+      {!activeMarker && (
+        <div className="safe-top safe-right absolute right-0 top-0 z-50 flex items-center gap-1.5 px-2 sm:gap-2 sm:px-0">
+          <Link
+            href="/admin"
+            className="rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-medium text-white/80 backdrop-blur-md transition hover:bg-black/70 sm:px-3 sm:py-1.5 sm:text-[11px]"
+          >
+            Admin
+          </Link>
+          <CloseButton onClick={handleClose} />
+        </div>
+      )}
+
+      <AnimatePresence>
+        {activeMarker && (
+          <ArVideoOverlay
+            key={activeMarker.id}
+            label={activeMarker.label}
+            videoSrc={activeMarker.videoSrc}
+            poster={activeMarker.previewImage}
+            article={normalizeMarkerArticle(activeMarker.label, activeMarker.article)}
+            onClose={handleCloseOverlay}
           />
         )}
-      </div>
-
-      <div className="safe-top safe-right absolute right-0 top-0 z-50 flex items-center gap-1.5 px-2 sm:gap-2 sm:px-0">
-        <Link
-          href="/admin"
-          className="rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-medium text-white/80 backdrop-blur-md transition hover:bg-black/70 sm:px-3 sm:py-1.5 sm:text-[11px]"
-        >
-          Admin
-        </Link>
-        <CloseButton onClick={handleClose} />
-      </div>
+      </AnimatePresence>
     </main>
   );
 }

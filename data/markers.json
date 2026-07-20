@@ -58,7 +58,7 @@
         ]
       },
       "createdAt": "2026-07-07T08:49:47.030Z",
-      "updatedAt": "2026-07-17T03:07:02.632Z"
+      "updatedAt": "2026-07-19T12:45:05.845Z"
     },
     {
       "id": "m-mraf2z1d",
@@ -116,7 +116,7 @@
         ]
       },
       "createdAt": "2026-07-07T08:58:47.906Z",
-      "updatedAt": "2026-07-17T03:07:02.632Z"
+      "updatedAt": "2026-07-19T12:45:05.845Z"
     },
     {
       "id": "m-mraf77sx",
@@ -174,7 +174,7 @@
         ]
       },
       "createdAt": "2026-07-07T09:02:05.890Z",
-      "updatedAt": "2026-07-17T03:07:02.632Z"
+      "updatedAt": "2026-07-19T12:45:05.845Z"
     },
     {
       "id": "m-mrafin0e",
@@ -228,40 +228,40 @@
         ]
       },
       "createdAt": "2026-07-07T09:10:58.814Z",
-      "updatedAt": "2026-07-17T03:07:02.632Z"
+      "updatedAt": "2026-07-19T12:45:05.845Z"
     },
     {
-      "id": "m-mrocx4pu",
-      "label": "...",
+      "id": "m-mrrrt5li",
+      "label": "1",
       "targetIndex": 12,
       "targetIndices": [
         12,
         13,
         14
       ],
-      "previewImage": "/uploads/markers/m-mrocx4pu/withBackground-source.jpg",
-      "sourceImage": "/uploads/markers/m-mrocx4pu/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrocx4pu/video.mp4",
+      "previewImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
+      "sourceImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
+      "videoSrc": "/uploads/markers/m-mrrrt5li/video.mp4",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
-          "sourceImage": "/uploads/markers/m-mrocx4pu/onShirt-source.jpg",
-          "previewImage": "/uploads/markers/m-mrocx4pu/onShirt-source.jpg"
+          "sourceImage": "/uploads/markers/m-mrrrt5li/onShirt-source.png",
+          "previewImage": "/uploads/markers/m-mrrrt5li/onShirt-source.png"
         },
         "noBackground": {
           "label": "Logo không nền",
-          "sourceImage": "/uploads/markers/m-mrocx4pu/noBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mrocx4pu/noBackground-source.jpg"
+          "sourceImage": "/uploads/markers/m-mrrrt5li/noBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrrt5li/noBackground-source.jpg"
         },
         "withBackground": {
           "label": "Logo có nền",
-          "sourceImage": "/uploads/markers/m-mrocx4pu/withBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mrocx4pu/withBackground-source.jpg"
+          "sourceImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg"
         }
       },
       "article": {
         "videoCaption": "",
-        "articleTitle": "...",
+        "articleTitle": "1",
         "sections": [
           {
             "heading": "GIỚI THIỆU",
@@ -269,8 +269,92 @@
           }
         ]
       },
-      "createdAt": "2026-07-17T03:07:02.563Z",
-      "updatedAt": "2026-07-17T03:07:02.632Z"
+      "createdAt": "2026-07-19T12:27:09.847Z",
+      "updatedAt": "2026-07-19T12:45:05.845Z"
+    },
+    {
+      "id": "m-mrrsfeov",
+      "label": "2",
+      "targetIndex": 15,
+      "targetIndices": [
+        15,
+        16,
+        17
+      ],
+      "previewImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
+      "sourceImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
+      "videoSrc": "/uploads/markers/m-mrrsfeov/video.mp4",
+      "variants": {
+        "onShirt": {
+          "label": "Logo trên áo",
+          "sourceImage": "/uploads/markers/m-mrrsfeov/onShirt-source.png",
+          "previewImage": "/uploads/markers/m-mrrsfeov/onShirt-source.png"
+        },
+        "noBackground": {
+          "label": "Logo không nền",
+          "sourceImage": "/uploads/markers/m-mrrsfeov/noBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrsfeov/noBackground-source.jpg"
+        },
+        "withBackground": {
+          "label": "Logo có nền",
+          "sourceImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg"
+        }
+      },
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "2",
+        "sections": [
+          {
+            "heading": "GIỚI THIỆU",
+            "body": "Thêm nội dung bài viết tại trang Admin."
+          }
+        ]
+      },
+      "createdAt": "2026-07-19T12:44:28.064Z",
+      "updatedAt": "2026-07-19T12:45:05.845Z"
+    },
+    {
+      "id": "m-mrrsg764",
+      "label": "3",
+      "targetIndex": 18,
+      "targetIndices": [
+        18,
+        19,
+        20
+      ],
+      "previewImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
+      "sourceImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
+      "videoSrc": "/uploads/markers/m-mrrsg764/video.mp4",
+      "variants": {
+        "onShirt": {
+          "label": "Logo trên áo",
+          "sourceImage": "/uploads/markers/m-mrrsg764/onShirt-source.png",
+          "previewImage": "/uploads/markers/m-mrrsg764/onShirt-source.png"
+        },
+        "noBackground": {
+          "label": "Logo không nền",
+          "sourceImage": "/uploads/markers/m-mrrsg764/noBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrsg764/noBackground-source.jpg"
+        },
+        "withBackground": {
+          "label": "Logo có nền",
+          "sourceImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg"
+        }
+      },
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "3",
+        "sections": [
+          {
+            "heading": "GIỚI THIỆU",
+            "body": "Thêm nội dung bài viết tại trang Admin."
+          }
+        ]
+      },
+      "createdAt": "2026-07-19T12:45:04.972Z",
+      "updatedAt": "2026-07-19T12:45:05.845Z"
     }
   ]
 }

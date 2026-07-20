@@ -60,8 +60,14 @@ body {
   opacity: 0 !important;
 }
 
-.ar-camera-root video {
+.ar-camera-root video,
+.ar-camera-root a-scene video {
   position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  margin: 0 !important;
   z-index: 2 !important;
   visibility: visible !important;
   opacity: 1 !important;
