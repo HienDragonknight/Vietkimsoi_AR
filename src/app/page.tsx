@@ -3,12 +3,9 @@
 import { useRouter } from "next/navigation";
 import { AnimatePresence } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import Link from "next/link";
-import { CloseButton } from "@/components/CloseButton";
 import { LoadingScreen } from "@/components/LoadingScreen";
 import { ScanButton } from "@/components/ScanButton";
 import { ScanOverlay } from "@/components/ScanOverlay";
-import { StatusToast } from "@/components/StatusToast";
 import { useMindARScene } from "@/hooks/useMindARScene";
 import { ArVideoOverlay } from "@/components/ArVideoOverlay";
 import { normalizeMarkerArticle } from "@/lib/markers/article";
@@ -178,8 +175,6 @@ export default function ScanPage() {
         </div>
       )}
 
-      {!activeMarker && <StatusToast toast={toast} />}
-
       {!activeMarker && (
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-4">
           <ScanOverlay
@@ -216,18 +211,6 @@ export default function ScanPage() {
               }
             />
           )}
-        </div>
-      )}
-
-      {!activeMarker && (
-        <div className="safe-top safe-right absolute right-0 top-0 z-50 flex items-center gap-1.5 px-2 sm:gap-2 sm:px-0">
-          <Link
-            href="/admin"
-            className="rounded-full border border-white/20 bg-black/50 px-2.5 py-1 text-[10px] font-medium text-white/80 backdrop-blur-md transition hover:bg-black/70 sm:px-3 sm:py-1.5 sm:text-[11px]"
-          >
-            Admin
-          </Link>
-          <CloseButton onClick={handleClose} />
         </div>
       )}
 
