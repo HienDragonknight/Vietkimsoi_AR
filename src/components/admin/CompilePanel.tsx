@@ -80,11 +80,22 @@ export function CompilePanel({
       await uploadMindFile(file);
       setProgress(100);
     } catch (e) {
-      setError(
-        e instanceof Error
-          ? e.message
-          : "Compile thất bại. Thử upload file .mind thủ công."
-      );
+      const msg = e instanceof Error ? e.message : String(e);
+      if (
+        msg.includes("GL_OUT_OF_MEMORY") ||
+        msg.includes("context") ||
+        msg.includes("WebGL")
+      ) {
+        setError(
+          "Bộ nhớ WebGL/GPU bị đầy khi compile. Hãy tải lại trang (F5) và thử lại, hoặc Upload file targets.mind thủ công."
+        );
+      } else {
+        setError(
+          e instanceof Error
+            ? e.message
+            : "Compile thất bại. Thử upload file .mind thủ công."
+        );
+      }
     } finally {
       setCompiling(false);
     }

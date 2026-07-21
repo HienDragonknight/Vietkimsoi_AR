@@ -29,10 +29,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Tên chủ đề là bắt buộc." }, { status: 400 });
     }
 
+    const videoUrl = String(form.get("videoUrl") ?? "").trim();
     const videoFile = form.get("video");
-    if (!(videoFile instanceof File) || videoFile.size === 0) {
-      return NextResponse.json({ error: "Video là bắt buộc." }, { status: 400 });
-    }
 
     const registry = await readRegistry();
     const id = generateMarkerId();
@@ -40,10 +38,21 @@ export async function POST(request: Request) {
     const now = new Date().toISOString();
 
     const variants = await saveVariantFiles(form, dir);
-    const videoExt = pathExt(videoFile.name, ".mp4");
-    const videoSrc = publicUrlFromUpload(
-      await saveUploadedFile(videoFile, `${dir}/video${videoExt}`)
-    );
+
+    let videoSrc = "";
+    if (videoUrl) {
+      videoSrc = videoUrl;
+    } else if (videoFile instanceof File && videoFile.size > 0) {
+      const videoExt = pathExt(videoFile.name, ".mp4");
+      videoSrc = publicUrlFromUpload(
+        await saveUploadedFile(videoFile, `${dir}/video${videoExt}`)
+      );
+    } else {
+      return NextResponse.json(
+        { error: "Vui lòng tải file video hoặc nhập link video public." },
+        { status: 400 }
+      );
+    }
 
     const articleBase = parseArticleFromForm(form, defaultArticle(label));
     const article = {

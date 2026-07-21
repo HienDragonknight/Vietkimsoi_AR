@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { ScanOverlay } from "./ScanOverlay";
+import { isYouTubeUrl, getYouTubeEmbedUrl } from "@/lib/video";
 
 interface VideoPlayerProps {
   src: string;
@@ -12,11 +13,13 @@ interface VideoPlayerProps {
 }
 
 /**
- * Large, responsive, aspect-ratio-locked video with rounded corners, a
- * fade/scale-in entrance and decorative scan-corner overlay.
- */
+  * Large, responsive, aspect-ratio-locked video with rounded corners, a
+  * fade/scale-in entrance and decorative scan-corner overlay.
+  */
 export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const isYouTube = isYouTubeUrl(src);
+  const embedUrl = isYouTube ? getYouTubeEmbedUrl(src, { autoplay: true }) : "";
 
   return (
     <motion.div
@@ -25,28 +28,40 @@ export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
       transition={{ duration: 0.65, ease: "easeOut" }}
       className="relative aspect-video w-[94vw] max-w-4xl overflow-hidden rounded-2xl bg-neutral-950 shadow-glass-lg ring-1 ring-white/10 sm:rounded-3xl md:w-[82vw] lg:w-[70vw]"
     >
-      <video
-        src={src}
-        poster={poster}
-        autoPlay
-        controls
-        playsInline
-        loop
-        onLoadedData={() => setIsLoaded(true)}
-        className="h-full w-full rounded-3xl bg-black object-contain"
-        aria-label={title}
-      >
-        <track kind="captions" />
-      </video>
+      {isYouTube ? (
+        <iframe
+          src={embedUrl}
+          title={title ?? "Video"}
+          className="h-full w-full rounded-3xl border-0 bg-black"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+        />
+      ) : (
+        <>
+          <video
+            src={src}
+            poster={poster}
+            autoPlay
+            controls
+            playsInline
+            loop
+            onLoadedData={() => setIsLoaded(true)}
+            className="h-full w-full rounded-3xl bg-black object-contain"
+            aria-label={title}
+          >
+            <track kind="captions" />
+          </video>
 
-      {!isLoaded && (
-        <motion.div
-          initial={{ opacity: 1 }}
-          animate={{ opacity: isLoaded ? 0 : 1 }}
-          className="absolute inset-0 flex items-center justify-center bg-black"
-        >
-          <Loader2 size={32} className="animate-spin text-white/70" />
-        </motion.div>
+          {!isLoaded && (
+            <motion.div
+              initial={{ opacity: 1 }}
+              animate={{ opacity: isLoaded ? 0 : 1 }}
+              className="absolute inset-0 flex items-center justify-center bg-black"
+            >
+              <Loader2 size={32} className="animate-spin text-white/70" />
+            </motion.div>
+          )}
+        </>
       )}
 
       <div className="pointer-events-none absolute inset-3 sm:inset-4">
@@ -55,3 +70,4 @@ export function VideoPlayer({ src, poster, title }: VideoPlayerProps) {
     </motion.div>
   );
 }
+

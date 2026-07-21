@@ -241,7 +241,7 @@
       ],
       "previewImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrrrt5li/video.mp4",
+      "videoSrc": "https://youtube.com/shorts/Md7XItwZT18",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -270,7 +270,7 @@
         ]
       },
       "createdAt": "2026-07-19T12:27:09.847Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
+      "updatedAt": "2026-07-21T01:36:32.304Z"
     },
     {
       "id": "m-mrrsfeov",
@@ -283,7 +283,7 @@
       ],
       "previewImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrrsfeov/video.mp4",
+      "videoSrc": "https://youtube.com/shorts/fBNOUSssxFI",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -312,7 +312,7 @@
         ]
       },
       "createdAt": "2026-07-19T12:44:28.064Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
+      "updatedAt": "2026-07-21T01:35:35.578Z"
     },
     {
       "id": "m-mrrsg764",
@@ -325,7 +325,7 @@
       ],
       "previewImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrrsg764/video.mp4",
+      "videoSrc": "https://youtube.com/shorts/MZc-3LKvqiw",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -354,7 +354,7 @@
         ]
       },
       "createdAt": "2026-07-19T12:45:04.972Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
+      "updatedAt": "2026-07-21T01:37:04.397Z"
     }
   ]
 }

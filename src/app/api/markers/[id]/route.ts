@@ -47,8 +47,11 @@ export async function PUT(request: Request, context: RouteContext) {
     const variants = await saveVariantFiles(form, dir, existing.variants);
 
     let videoSrc = existing.videoSrc;
+    const videoUrl = String(form.get("videoUrl") ?? "").trim();
     const videoFile = form.get("video");
-    if (videoFile instanceof File && videoFile.size > 0) {
+    if (videoUrl) {
+      videoSrc = videoUrl;
+    } else if (videoFile instanceof File && videoFile.size > 0) {
       const ext = pathExt(videoFile.name, ".mp4");
       videoSrc = publicUrlFromUpload(
         await saveUploadedFile(videoFile, `${dir}/video${ext}`)

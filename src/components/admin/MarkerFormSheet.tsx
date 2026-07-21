@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import {
   FileUp,
   ImagePlus,
+  Link as LinkIcon,
   Loader2,
   Sparkles,
   Trash2,
@@ -22,6 +23,7 @@ import {
   VARIANT_LABELS,
   type VariantKey,
 } from "@/lib/markers/variants";
+import { isYouTubeUrl } from "@/lib/video";
 
 interface MarkerFormSheetProps {
   open: boolean;
@@ -42,6 +44,9 @@ export function MarkerFormSheet({
 }: MarkerFormSheetProps) {
   const isEdit = !!marker;
   const initialArticle = marker?.article ?? defaultArticle(marker?.label ?? "");
+  const initialVideoIsUrl = marker?.videoSrc
+    ? marker.videoSrc.startsWith("http://") || marker.videoSrc.startsWith("https://")
+    : false;
 
   const [label, setLabel] = useState(marker?.label ?? "");
   const [variants, setVariants] = useState<Record<VariantKey, File | null>>({
@@ -49,7 +54,13 @@ export function MarkerFormSheet({
     noBackground: null,
     withBackground: null,
   });
+  const [videoMode, setVideoMode] = useState<"file" | "url">(
+    initialVideoIsUrl ? "url" : "file"
+  );
   const [video, setVideo] = useState<File | null>(null);
+  const [videoUrlInput, setVideoUrlInput] = useState<string>(
+    initialVideoIsUrl ? marker?.videoSrc ?? "" : ""
+  );
   const [pasteText, setPasteText] = useState("");
   const [articleTitle, setArticleTitle] = useState(initialArticle.articleTitle);
   const [sections, setSections] = useState<SectionDraft[]>(
@@ -88,7 +99,12 @@ export function MarkerFormSheet({
       if (missing.length > 0) {
         return alert(`Chọn đủ 3 ảnh marker: ${missing.map((k) => VARIANT_LABELS[k]).join(", ")}`);
       }
-      if (!video) return alert("Chọn video cho chủ đề này.");
+      if (videoMode === "file" && !video) {
+        return alert("Chọn file video cho chủ đề này.");
+      }
+      if (videoMode === "url" && !videoUrlInput.trim()) {
+        return alert("Nhập link video public (VD: https://youtube.com/shorts/fBNOUSssxFI).");
+      }
     }
 
     setSubmitting(true);
@@ -111,7 +127,11 @@ export function MarkerFormSheet({
       for (const key of VARIANT_KEYS) {
         if (variants[key]) form.append(`variant_${key}`, variants[key]!);
       }
-      if (video) form.append("video", video);
+      if (videoMode === "url" && videoUrlInput.trim()) {
+        form.append("videoUrl", videoUrlInput.trim());
+      } else if (video) {
+        form.append("video", video);
+      }
 
       sections.forEach((section, i) => {
         if (section.imageFile) {
@@ -233,16 +253,80 @@ export function MarkerFormSheet({
                   </div>
                 </section>
 
-                <section>
-                  <FilePick
-                    label={isEdit ? "Video (1 video / chủ đề)" : "Video *"}
-                    accept="video/*"
-                    icon={<FileUp size={18} />}
-                    file={video}
-                    hint="Video phát sau khi quét — VD: Bản sao của Lúa.mp4"
-                    existingUrl={marker?.videoSrc}
-                    onChange={setVideo}
-                  />
+                <section className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-sm font-semibold text-white/85">
+                      {isEdit ? "Video (1 video / chủ đề)" : "Video *"}
+                    </label>
+                    <div className="flex items-center rounded-xl bg-black/40 p-1 border border-white/10 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setVideoMode("file")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
+                          videoMode === "file"
+                            ? "bg-white text-black font-semibold shadow-sm"
+                            : "text-white/60 hover:text-white"
+                        }`}
+                      >
+                        <FileUp size={14} />
+                        Tải file
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setVideoMode("url")}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium transition ${
+                          videoMode === "url"
+                            ? "bg-white text-black font-semibold shadow-sm"
+                            : "text-white/60 hover:text-white"
+                        }`}
+                      >
+                        <LinkIcon size={14} />
+                        Link public / Youtube
+                      </button>
+                    </div>
+                  </div>
+
+                  {videoMode === "file" ? (
+                    <FilePick
+                      label=""
+                      accept="video/*"
+                      icon={<FileUp size={18} />}
+                      file={video}
+                      hint="Video phát sau khi quét — VD: Bản sao của Lúa.mp4"
+                      existingUrl={marker?.videoSrc && !marker.videoSrc.startsWith("http") ? marker.videoSrc : undefined}
+                      onChange={setVideo}
+                    />
+                  ) : (
+                    <div className="space-y-2 rounded-2xl border border-white/10 bg-black/25 p-3.5 sm:p-4">
+                      <div className="relative">
+                        <input
+                          type="url"
+                          value={videoUrlInput}
+                          onChange={(e) => setVideoUrlInput(e.target.value)}
+                          placeholder="VD: https://youtube.com/shorts/fBNOUSssxFI"
+                          className="field-input pr-9 text-sm"
+                        />
+                        {videoUrlInput && (
+                          <button
+                            type="button"
+                            onClick={() => setVideoUrlInput("")}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white"
+                          >
+                            <X size={15} />
+                          </button>
+                        )}
+                      </div>
+                      <p className="text-xs text-white/45">
+                        Hỗ trợ link Youtube Shorts, Youtube Video, hoặc link trực tiếp .mp4 / .webm public.
+                      </p>
+                      {isYouTubeUrl(videoUrlInput) && (
+                        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs font-medium text-emerald-300">
+                          <Sparkles size={14} />
+                          <span>Đã nhận diện link Youtube Shorts / Video! Video sẽ hiển thị dạng player Youtube trên AR.</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </section>
 
                 <section className="space-y-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-4">
