@@ -139,7 +139,7 @@
       ],
       "previewImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrvsve7b/video.mp4",
+      "videoSrc": "https://res.cloudinary.com/dev4uz63q/video/upload/v1784712096/redpandacompress_Untitled_design_1_ykp385.mp4",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -168,7 +168,7 @@
         ]
       },
       "createdAt": "2026-07-22T08:07:58.633Z",
-      "updatedAt": "2026-07-22T08:48:27.921Z"
+      "updatedAt": "2026-07-22T09:22:20.986Z"
     }
   ]
 }
