@@ -3,245 +3,17 @@
   "targetsMind": "/uploads/targets.mind",
   "markers": [
     {
-      "id": "m-mraerdp2",
-      "label": "Lúa",
+      "id": "m-mrrrt5li",
+      "label": "1",
       "targetIndex": 0,
       "targetIndices": [
         0,
         1,
         2
       ],
-      "previewImage": "/uploads/markers/m-mraerdp2/withBackground-source.jpg",
-      "sourceImage": "/uploads/markers/m-mraerdp2/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mraerdp2/video.mp4",
-      "variants": {
-        "onShirt": {
-          "label": "Logo trên áo",
-          "sourceImage": "/uploads/markers/m-mraerdp2/onShirt-source.jpg",
-          "previewImage": "/uploads/markers/m-mraerdp2/onShirt-source.jpg"
-        },
-        "noBackground": {
-          "label": "Logo không nền",
-          "sourceImage": "/uploads/markers/m-mraerdp2/noBackground-source.png",
-          "previewImage": "/uploads/markers/m-mraerdp2/noBackground-source.png"
-        },
-        "withBackground": {
-          "label": "Logo có nền",
-          "sourceImage": "/uploads/markers/m-mraerdp2/withBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mraerdp2/withBackground-source.jpg"
-        }
-      },
-      "article": {
-        "videoCaption": "",
-        "articleTitle": "Lúa",
-        "sections": [
-          {
-            "heading": "🌾LÚA - HẠT VÀNG CỦA NỀN VĂN MINH LÚA NƯỚC🌾",
-            "body": ""
-          },
-          {
-            "heading": "NGUỒN GỐC",
-            "body": "Cây lúa là một trong những hình ảnh gần gũi nhất với đời sống người Việt. Từ những cánh đồng trải dài ở đồng bằng Bắc Bộ, miền Trung đến vùng sông nước Nam Bộ, lúa không chỉ tạo nên nguồn lương thực chủ yếu mà còn góp phần hình thành nhịp sống, tập quán lao động, lễ hội và ký ức làng quê của nhiều thế hệ. Bởi vậy, cây lúa thường được nhìn nhận như biểu tượng của nền văn minh lúa nước Việt Nam."
-          },
-          {
-            "heading": "Ý NGHĨA BIỂU TƯỢNG",
-            "body": "Một bông lúa nhỏ mang trong mình câu chuyện lớn về sự cần cù. Để hạt lúa chín vàng, người nông dân phải đi qua nhiều mùa vụ, từ làm đất, gieo mạ, dẫn nước, chăm lúa đến ngày thu hoạch. Hình ảnh ấy gợi nhắc tinh thần lao động bền bỉ, sự biết ơn với đất trời và niềm hy vọng về cuộc sống đủ đầy. Trong văn hóa dân gian, hạt lúa thường được gọi bằng cái tên trìu mến là “hạt ngọc”, bởi đó là kết tinh của nắng, mưa, bàn tay con người và sự gắn bó của cộng đồng."
-          },
-          {
-            "heading": "TRÊN TRANG PHỤC VIE’CO",
-            "body": "VIE’CO lựa chọn hình ảnh bông lúa để kể một câu chuyện văn hóa gần gũi hơn với đời sống hiện đại. Thay vì tái hiện nguyên cánh đồng theo lối minh họa trực diện, họa tiết có thể được nhìn nhận qua những đường cong mảnh, các hạt lúa nối tiếp nhau và nhịp vươn lên mềm mại của thân cây. Sự giản lược ấy giúp biểu tượng lúa trở nên dễ mặc, trẻ trung và phù hợp với ngôn ngữ thiết kế đương đại, nhưng vẫn giữ được tinh thần của quê hương."
-          },
-          {
-            "heading": "THÔNG ĐIỆP",
-            "body": "Trên mỗi trang phục, bông lúa đại diện cho sự sinh sôi, tinh thần chịu khó và khả năng vươn lên từ những điều bình dị. Đây cũng là lời nhắc rằng bản sắc Việt không chỉ nằm trong những biểu tượng lớn lao, mà còn hiện diện trong hạt cơm hàng ngày, trong mùa gặt và trong ký ức về một đất nước được nuôi dưỡng từ ruộng đồng."
-          }
-        ]
-      },
-      "createdAt": "2026-07-07T08:49:47.030Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
-    },
-    {
-      "id": "m-mraf2z1d",
-      "label": "Sen",
-      "targetIndex": 3,
-      "targetIndices": [
-        3,
-        4,
-        5
-      ],
-      "previewImage": "/uploads/markers/m-mraf2z1d/withBackground-source.png",
-      "sourceImage": "/uploads/markers/m-mraf2z1d/withBackground-source.png",
-      "videoSrc": "/uploads/markers/m-mraf2z1d/video.mp4",
-      "variants": {
-        "onShirt": {
-          "label": "Logo trên áo",
-          "sourceImage": "/uploads/markers/m-mraf2z1d/onShirt-source.jpg",
-          "previewImage": "/uploads/markers/m-mraf2z1d/onShirt-source.jpg"
-        },
-        "noBackground": {
-          "label": "Logo không nền",
-          "sourceImage": "/uploads/markers/m-mraf2z1d/noBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mraf2z1d/noBackground-source.jpg"
-        },
-        "withBackground": {
-          "label": "Logo có nền",
-          "sourceImage": "/uploads/markers/m-mraf2z1d/withBackground-source.png",
-          "previewImage": "/uploads/markers/m-mraf2z1d/withBackground-source.png"
-        }
-      },
-      "article": {
-        "videoCaption": "",
-        "articleTitle": "Sen",
-        "sections": [
-          {
-            "heading": "SEN – VẺ ĐẸP THANH CAO CỦA TÂM HỒN VIỆT",
-            "body": ""
-          },
-          {
-            "heading": "NGUỒN GỐC",
-            "body": "Hoa sen từ lâu đã là một hình tượng quen thuộc trong đời sống, nghệ thuật và tâm thức của người Việt. Sen mọc từ bùn, vươn lên mặt nước và nở thành những cánh hoa thanh khiết. Chính hành trình ấy khiến sen thường được gắn với vẻ đẹp trong sáng, sự bền bỉ và khả năng giữ gìn phẩm chất tốt đẹp giữa những hoàn cảnh nhiều biến động."
-          },
-          {
-            "heading": "DẤU ẤN TRONG NGHỆ THUẬT TRUYỀN THỐNG",
-            "body": "Trong mỹ thuật truyền thống Việt Nam, hình tượng hoa sen xuất hiện rất sớm và được thể hiện trên nhiều chất liệu như gốm, đá, gỗ, kiến trúc, đồ thờ và điêu khắc. Các nghiên cứu của Bảo tàng Lịch sử quốc gia cho thấy từ thời Đinh - Tiền Lê đã có những viên gạch trang trí hoa sen tám cánh; đến thời Lý, sen trở thành một mô-típ nổi bật trong kiến trúc Phật giáo, từ bệ cột chùa, chân tháp đến các đồ án trang trí trên cổ vật.\n\nKhông chỉ gắn với mỹ thuật cung đình hay tôn giáo, hoa sen còn đi vào thơ ca, hội họa, kiến trúc và đời sống thường nhật như một biểu tượng văn hóa giàu cảm xúc. Trong cách cảm nhận của người Việt, sen không phô trương nhưng vẫn nổi bật; nhẹ nhàng nhưng không yếu đuối. Đó là vẻ đẹp của sự tinh tế, biết giữ mình và luôn hướng về điều tốt lành."
-          },
-          {
-            "heading": "TRÊN TRANG PHỤC VIE’CO",
-            "body": "Trên trang phục VIE’CO, hoa sen được tái hiện qua những lớp cánh xếp mềm, đường nét tròn đầy và nhịp nở tự nhiên của một đóa hoa. Họa tiết không nhằm sao chép nguyên mẫu cổ vật, mà lấy cảm hứng từ tinh thần thanh thoát của sen để tạo nên chi tiết hiện đại, dễ ứng dụng trong đời sống hàng ngày."
-          },
-          {
-            "heading": "THÔNG ĐIỆP",
-            "body": "Mang họa tiết sen không chỉ là lựa chọn một hình ảnh đẹp. Đó còn là cách người mặc mang theo tinh thần sống trong trẻo, bình tĩnh và vững vàng; biết vươn lên từ những điều bình dị để trở thành phiên bản rực rỡ hơn của chính mình."
-          }
-        ]
-      },
-      "createdAt": "2026-07-07T08:58:47.906Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
-    },
-    {
-      "id": "m-mraf77sx",
-      "label": "VOI",
-      "targetIndex": 6,
-      "targetIndices": [
-        6,
-        7,
-        8
-      ],
-      "previewImage": "/uploads/markers/m-mraf77sx/withBackground-source.jpg",
-      "sourceImage": "/uploads/markers/m-mraf77sx/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mraf77sx/video.mp4",
-      "variants": {
-        "onShirt": {
-          "label": "Logo trên áo",
-          "sourceImage": "/uploads/markers/m-mraf77sx/onShirt-source.jpg",
-          "previewImage": "/uploads/markers/m-mraf77sx/onShirt-source.jpg"
-        },
-        "noBackground": {
-          "label": "Logo không nền",
-          "sourceImage": "/uploads/markers/m-mraf77sx/noBackground-source.png",
-          "previewImage": "/uploads/markers/m-mraf77sx/noBackground-source.png"
-        },
-        "withBackground": {
-          "label": "Logo có nền",
-          "sourceImage": "/uploads/markers/m-mraf77sx/withBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mraf77sx/withBackground-source.jpg"
-        }
-      },
-      "article": {
-        "videoCaption": "",
-        "articleTitle": "VOI",
-        "sections": [
-          {
-            "heading": "🐘 VOI - SỨC MẠNH CỦA ĐẠI NGÀN 🐘",
-            "body": ""
-          },
-          {
-            "heading": "NGUỒN GỐC",
-            "body": "Trong không gian văn hóa Việt Nam, voi không chỉ là một loài vật của núi rừng mà còn là hình ảnh gắn với sức mạnh, lòng trung thành và sự gắn kết cộng đồng. Dấu vết của voi đã xuất hiện từ sớm trong nghệ thuật tạo hình Đông Sơn, nơi các nghệ nhân thể hiện hình tượng voi khá chân thực trên đồ đồng và các hiện vật khảo cổ. Qua nhiều giai đoạn lịch sử, voi còn đi vào ký ức dân tộc qua hình ảnh voi chiến, đặc biệt trong những câu chuyện gắn với Hai Bà Trưng và Bà Triệu."
-          },
-          {
-            "heading": "Ý NGHĨA BIỂU TƯỢNG",
-            "body": "Với đồng bào Tây Nguyên, đặc biệt tại vùng Buôn Đôn, voi mang ý nghĩa sâu sắc hơn một phương tiện lao động hay hình ảnh lễ hội. Voi được xem là người bạn của buôn làng, là thành viên của cộng đồng và là biểu tượng cho quyền uy, sức mạnh vật chất lẫn tinh thần. Trong đời sống của nhiều cộng đồng Ê Đê, Mnông và cư dân Tây Nguyên, một chú voi từng là niềm tự hào của gia đình, dòng họ và cả buôn làng."
-          },
-          {
-            "heading": "TRÊN TRANG PHỤC VIE’CO",
-            "body": "Khi xuất hiện trên trang phục VIE’CO, hình tượng voi không được tái hiện theo cách mô phỏng nguyên bản một nghi lễ hay hoa văn của bất kỳ cộng đồng nào. Thay vào đó, thiết kế khai thác đường nét vững chãi của thân voi, đôi tai rộng, chiếc vòi mềm nhưng đầy nội lực và nhịp chuyển động chậm rãi của loài vật gắn với đại ngàn. Họa tiết vì thế gợi nhắc vẻ đẹp hùng vĩ của Tây Nguyên, đồng thời thể hiện tinh thần bền bỉ, điềm tĩnh và gan trường."
-          },
-          {
-            "heading": "THÔNG ĐIỆP",
-            "body": "Voi trên trang phục không chỉ là một chi tiết trang trí mà là lời nhắc về sự kiên định, lòng trung thành và tinh thần sống hài hòa với cộng đồng, thiên nhiên và những giá trị bản sắc đã được gìn giữ qua nhiều thế hệ."
-          }
-        ]
-      },
-      "createdAt": "2026-07-07T09:02:05.890Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
-    },
-    {
-      "id": "m-mrafin0e",
-      "label": "Rồng",
-      "targetIndex": 9,
-      "targetIndices": [
-        9,
-        10,
-        11
-      ],
-      "previewImage": "/uploads/markers/m-mrafin0e/withBackground-source.jpg",
-      "sourceImage": "/uploads/markers/m-mrafin0e/withBackground-source.jpg",
-      "videoSrc": "/uploads/markers/m-mrafin0e/video.mp4",
-      "variants": {
-        "onShirt": {
-          "label": "Logo trên áo",
-          "sourceImage": "/uploads/markers/m-mrafin0e/onShirt-source.jpg",
-          "previewImage": "/uploads/markers/m-mrafin0e/onShirt-source.jpg"
-        },
-        "noBackground": {
-          "label": "Logo không nền",
-          "sourceImage": "/uploads/markers/m-mrafin0e/noBackground-source.png",
-          "previewImage": "/uploads/markers/m-mrafin0e/noBackground-source.png"
-        },
-        "withBackground": {
-          "label": "Logo có nền",
-          "sourceImage": "/uploads/markers/m-mrafin0e/withBackground-source.jpg",
-          "previewImage": "/uploads/markers/m-mrafin0e/withBackground-source.jpg"
-        }
-      },
-      "article": {
-        "videoCaption": "",
-        "articleTitle": "🐉 RỒNG – KHÁT VỌNG VƯƠN LÊN CỦA NGƯỜI VIỆT 🐉",
-        "sections": [
-          {
-            "heading": "NGUỒN GỐC",
-            "body": "Rồng là một trong những hình tượng nổi bật nhất trong văn hóa Việt Nam. Trong tâm thức dân gian, người Việt tự hào gọi mình là “Con Rồng Cháu Tiên”, vì vậy rồng không chỉ là linh vật mà còn gắn với cội nguồn, tinh thần cộng đồng và khát vọng phát triển của dân tộc. Trong nghệ thuật truyền thống, rồng thường được xem là biểu tượng của sức mạnh, uy quyền, may mắn, mưa thuận gió hòa và mùa màng tốt tươi."
-          },
-          {
-            "heading": "Ý NGHĨA BIỂU TƯỢNG",
-            "body": "Hình ảnh “Thăng Long” - rồng bay lên - đặc biệt gợi nhắc khí thế vươn lên, sự cường thịnh và niềm tin vào tương lai của dân tộc. Vì vậy, rồng trong văn hóa Việt không chỉ mang vẻ uy nghi của chốn cung đình mà còn chứa đựng tinh thần chuyển động, sáng tạo và không ngừng tiến về phía trước."
-          },
-          {
-            "heading": "TRÊN TRANG PHỤC VIE’CO",
-            "body": "Trên thiết kế của VIE’CO, rồng được thể hiện theo tinh thần đương đại: mạnh mẽ nhưng không nặng nề, giàu chuyển động nhưng vẫn phù hợp với phom dáng thời trang hàng ngày. Những đường cong của thân rồng, nét mây, sóng hoặc chuyển động bay lên có thể được giản lược thành mảng họa tiết hiện đại, giúp biểu tượng truyền thống bước ra khỏi không gian cổ xưa để đồng hành cùng người trẻ."
-          },
-          {
-            "heading": "THÔNG ĐIỆP",
-            "body": "Họa tiết rồng đại diện cho bản lĩnh, ý chí vươn lên và niềm tự hào Việt Nam. Đó là lời nhắn gửi rằng mỗi người trẻ hôm nay có thể mang trong mình tinh thần của quá khứ, nhưng vẫn tự tin sáng tạo, chuyển động và tạo nên hành trình riêng trong hiện tại."
-          }
-        ]
-      },
-      "createdAt": "2026-07-07T09:10:58.814Z",
-      "updatedAt": "2026-07-19T12:45:05.845Z"
-    },
-    {
-      "id": "m-mrrrt5li",
-      "label": "1",
-      "targetIndex": 12,
-      "targetIndices": [
-        12,
-        13,
-        14
-      ],
       "previewImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrrt5li/withBackground-source.jpg",
-      "videoSrc": "https://youtube.com/shorts/Md7XItwZT18",
+      "videoSrc": "https://res.cloudinary.com/rqvirwyi/video/upload/v1784650243/redpandacompress_Dinh_%C4%91%E1%BB%99c_l%E1%BA%ADp_1_izuvkb.mp4",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -270,20 +42,20 @@
         ]
       },
       "createdAt": "2026-07-19T12:27:09.847Z",
-      "updatedAt": "2026-07-21T01:36:32.304Z"
+      "updatedAt": "2026-07-22T08:52:21.779Z"
     },
     {
       "id": "m-mrrsfeov",
       "label": "2",
-      "targetIndex": 15,
+      "targetIndex": 3,
       "targetIndices": [
-        15,
-        16,
-        17
+        3,
+        4,
+        5
       ],
       "previewImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrsfeov/withBackground-source.jpg",
-      "videoSrc": "https://youtube.com/shorts/fBNOUSssxFI",
+      "videoSrc": "https://res.cloudinary.com/rqvirwyi/video/upload/v1784650204/redpandacompress_L%C4%82NG_B%C3%81C_1_jmsbqq.mp4",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -312,20 +84,20 @@
         ]
       },
       "createdAt": "2026-07-19T12:44:28.064Z",
-      "updatedAt": "2026-07-21T01:35:35.578Z"
+      "updatedAt": "2026-07-22T08:51:25.139Z"
     },
     {
       "id": "m-mrrsg764",
       "label": "3",
-      "targetIndex": 18,
+      "targetIndex": 6,
       "targetIndices": [
-        18,
-        19,
-        20
+        6,
+        7,
+        8
       ],
       "previewImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
       "sourceImage": "/uploads/markers/m-mrrsg764/withBackground-source.jpg",
-      "videoSrc": "https://youtube.com/shorts/MZc-3LKvqiw",
+      "videoSrc": "https://res.cloudinary.com/rqvirwyi/video/upload/v1784652758/redpandacompress_H%E1%BB%99i_AN_1_xkmmyy.mp4",
       "variants": {
         "onShirt": {
           "label": "Logo trên áo",
@@ -354,7 +126,49 @@
         ]
       },
       "createdAt": "2026-07-19T12:45:04.972Z",
-      "updatedAt": "2026-07-21T01:37:04.397Z"
+      "updatedAt": "2026-07-22T08:52:02.556Z"
+    },
+    {
+      "id": "m-mrvsve7b",
+      "label": "....",
+      "targetIndex": 9,
+      "targetIndices": [
+        9,
+        10,
+        11
+      ],
+      "previewImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg",
+      "sourceImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg",
+      "videoSrc": "/uploads/markers/m-mrvsve7b/video.mp4",
+      "variants": {
+        "onShirt": {
+          "label": "Logo trên áo",
+          "sourceImage": "/uploads/markers/m-mrvsve7b/onShirt-source.jpg",
+          "previewImage": "/uploads/markers/m-mrvsve7b/onShirt-source.jpg"
+        },
+        "noBackground": {
+          "label": "Logo không nền",
+          "sourceImage": "/uploads/markers/m-mrvsve7b/noBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrvsve7b/noBackground-source.jpg"
+        },
+        "withBackground": {
+          "label": "Logo có nền",
+          "sourceImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg",
+          "previewImage": "/uploads/markers/m-mrvsve7b/withBackground-source.jpg"
+        }
+      },
+      "article": {
+        "videoCaption": "",
+        "articleTitle": "....",
+        "sections": [
+          {
+            "heading": "GIỚI THIỆU",
+            "body": "Thêm nội dung bài viết tại trang Admin."
+          }
+        ]
+      },
+      "createdAt": "2026-07-22T08:07:58.633Z",
+      "updatedAt": "2026-07-22T08:48:27.921Z"
     }
   ]
 }
